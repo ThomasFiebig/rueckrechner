@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gold- und Silber-Rückrechner</title>
+<meta name="description" content="Was wäre Gold und Silber heute wert? Rückrechnung ab 1979 mit Einmalkauf oder Sparplan, im Vergleich zum Konto nach Inflation.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F4F2EC;
+  --surface: #FFFFFF;
+  --ink: #191816;
+  --muted: #6B665E;
+  --line: #DDD8CC;
+  --gold: #C29D54;
+  --gold-text: #8A6A2B;
+  --silver: #5B7C9E;
+  --silver-text: #48647F;
+  --neg: #A4432F;
+  --pos: #3F7A4E;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #191816;
+    --surface: #22201D;
+    --ink: #F4F2EC;
+    --muted: #9C9489;
+    --line: #38342E;
+    --gold-text: #C29D54;
+    --silver: #6F93B8;
+    --silver-text: #8FADCB;
+    --neg: #E08A76;
+    --pos: #8CC49A;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #191816;
+  --surface: #22201D;
+  --ink: #F4F2EC;
+  --muted: #9C9489;
+  --line: #38342E;
+  --gold-text: #C29D54;
+  --silver: #6F93B8;
+  --silver-text: #8FADCB;
+  --neg: #E08A76;
+  --pos: #8CC49A;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Work Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 0 16px 64px; }
+
+header.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 24px 0; border-bottom: 1px solid var(--line); margin-bottom: 32px;
+}
+.logo { height: 80px; width: auto; display: block; }
+.logo-hell { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .logo-hell { display: block; }
+  :root:not([data-theme="light"]) .logo-dunkel { display: none; }
+}
+:root[data-theme="dark"] .logo-hell { display: block; }
+:root[data-theme="dark"] .logo-dunkel { display: none; }
+@media (max-width: 600px) { .logo { height: 56px; } header.top { flex-wrap: wrap; } }
+
+.actions { display: flex; gap: 8px; }
+button {
+  font: inherit; font-size: 14px; font-weight: 500; cursor: pointer;
+  padding: 10px 16px; border-radius: 2px;
+  border: 1px solid var(--line); background: transparent; color: var(--ink);
+}
+button:hover { border-color: var(--gold); }
+button.primary { background: var(--gold); border-color: var(--gold); color: #191816; }
+button.small { padding: 6px 10px; font-size: 13px; }
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.layout { display: grid; grid-template-columns: 360px 1fr; gap: 40px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; gap: 32px; } }
+main { min-width: 0; }
+
+.panel { background: var(--surface); border: 1px solid var(--line); padding: 24px; }
+.panel h2 { margin: 0 0 4px; }
+fieldset { border: 0; padding: 0; margin: 24px 0 0; min-width: 0; }
+legend {
+  padding: 0; margin-bottom: 12px; font-size: 12px; font-weight: 500;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--gold-text);
+}
+.field { margin-bottom: 14px; }
+.field label, .lbl { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+.field input[type="number"], .field input[type="text"], .field select, .zk-row input, .zk-row select {
+  width: 100%; font: inherit; color: var(--ink); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 2px; padding: 9px 10px;
+}
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.hint { font-size: 12px; color: var(--muted); margin: 4px 0 0; }
+
+/* Umschalter Einmalkauf / Sparplan / Beides */
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg label { text-align: center; font-size: 14px; font-weight: 500; padding: 9px 4px; cursor: pointer; color: var(--muted); border-left: 1px solid var(--line); }
+.seg label:first-of-type { border-left: 0; }
+.seg input:checked + label { background: var(--gold); color: #191816; }
+.seg input:focus-visible + label { outline: 2px solid var(--gold); outline-offset: -2px; }
+
+/* Gewichtung */
+.weight-head { display: flex; justify-content: space-between; font-size: 14px; font-weight: 500; margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+.weight-head .g { color: var(--gold-text); }
+.weight-head .s { color: var(--silver-text); }
+input[type="range"] { width: 100%; accent-color: var(--gold); margin: 4px 0 10px; }
+.presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.presets button { padding: 6px 0; }
+
+.zk-row { display: grid; grid-template-columns: 96px 1fr 36px; gap: 8px; margin-bottom: 8px; }
+.zk-row button { padding: 0; font-size: 18px; line-height: 1; }
+
+h1 { font-weight: 300; font-size: clamp(28px, 4vw, 40px); line-height: 1.15; margin: 0 0 6px; letter-spacing: -.01em; }
+h2 { font-weight: 500; font-size: 18px; margin: 0 0 16px; }
+.sub { color: var(--muted); margin: 0 0 32px; }
+.eyebrow { font-size: 12px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-text); margin: 0 0 6px; }
+section.block { padding: 28px 0; border-top: 1px solid var(--line); }
+.lead { color: var(--muted); margin: -8px 0 16px; }
+
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 8px; }
+@media (max-width: 600px) { .kpis { grid-template-columns: 1fr; } }
+.kpi { border: 1px solid var(--line); background: var(--surface); padding: 18px; }
+.kpi .label { font-size: 13px; color: var(--muted); }
+.kpi .value { font-size: 30px; font-weight: 300; line-height: 1.2; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.kpi.accent .value { color: var(--gold-text); }
+.kpi .subline { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.rows { display: grid; gap: 8px; }
+.r {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+  background: var(--surface); border: 1px solid var(--line); padding: 14px 18px;
+}
+.r .k { font-weight: 500; }
+.r .k small { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+.r .v { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.r.sum .v { font-weight: 600; }
+.dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.dot.g { background: var(--gold); }
+.dot.s { background: var(--silver); }
+.neg { color: var(--neg); }
+.pos { color: var(--pos); }
+@media (max-width: 600px) { .r { padding: 12px 14px; font-size: 15px; } }
+
+.bars { margin: 8px 0 20px; }
+.bar-row { display: grid; grid-template-columns: 170px 1fr 110px; gap: 12px; align-items: center; margin-bottom: 10px; font-size: 14px; }
+.bar-row.mine { font-weight: 600; }
+.bar-track { height: 18px; display: flex; gap: 2px; }
+.bar { height: 100%; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.bar.g { background: var(--gold); border-radius: 0; }
+.bar.s { background: var(--silver); }
+.bar-track .bar:last-child { border-radius: 0 4px 4px 0; }
+.bar.line { background: transparent; border: 1px dashed var(--muted); border-radius: 0 4px 4px 0; }
+.bar-row .num { text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .bar-row { grid-template-columns: 104px 1fr 84px; gap: 8px; font-size: 13px; } }
+
+.callout { border-left: 3px solid var(--gold); padding: 4px 0 4px 16px; margin: 0 0 20px; }
+
+.chartbox { position: relative; }
+.chart { width: 100%; height: auto; display: block; touch-action: pan-y; }
+.chart text { font-family: inherit; font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .a-g { fill: var(--gold); fill-opacity: .85; }
+.chart .a-s { fill: var(--silver); fill-opacity: .85; }
+.chart .edge { fill: none; stroke: var(--surface); stroke-width: 2; }
+.chart .l-ein { stroke: var(--ink); stroke-width: 2; fill: none; stroke-dasharray: 5 4; }
+.chart .l-konto { stroke: var(--neg); stroke-width: 2; fill: none; }
+.chart .cross { stroke: var(--muted); stroke-width: 1; }
+.chart .hit { fill: transparent; }
+.tip {
+  position: absolute; top: 0; pointer-events: none; background: var(--surface); border: 1px solid var(--line);
+  padding: 10px 12px; font-size: 13px; min-width: 190px; box-shadow: 0 4px 16px rgba(0,0,0,.08); font-variant-numeric: tabular-nums;
+}
+.tip b { display: block; margin-bottom: 4px; }
+.tip div { display: flex; justify-content: space-between; gap: 16px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13px; color: var(--muted); margin: 0 0 10px; }
+.legend i { display: inline-block; width: 14px; height: 10px; vertical-align: middle; margin-right: 6px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.legend i.g { background: var(--gold); }
+.legend i.s { background: var(--silver); }
+.legend i.e { width: 22px; height: 0; border-top: 2px dashed var(--ink); }
+.legend i.k { width: 22px; height: 0; border-top: 2px solid var(--neg); }
+
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; font-size: 14px; }
+th, td { text-align: right; padding: 8px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font-size: 11px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.tablewrap { overflow-x: auto; }
+details summary { cursor: pointer; font-weight: 500; font-size: 18px; }
+details[open] summary { margin-bottom: 16px; }
+.panel details summary { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-text); }
+
+.notes { font-size: 13px; color: var(--muted); padding-left: 18px; margin: 0; }
+.notes li { margin-bottom: 6px; }
+.contact { display: grid; grid-template-columns: auto 1fr; gap: 4px 20px; font-size: 14px; margin: 12px 0 0; }
+.contact dt { font-size: 12px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; padding-top: 2px; }
+.contact dd { margin: 0; }
+.disclaimer { font-size: 12px; color: var(--muted); margin-top: 24px; }
+/* Ergebnisleiste unten, nur schmale Bildschirme */
+.dock { display: none; }
+@media (max-width: 900px) {
+  .dock {
+    display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 5;
+    background: var(--surface); border-top: 1px solid var(--line);
+    padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+    font-variant-numeric: tabular-nums; box-shadow: 0 -4px 16px rgba(0,0,0,.06);
+  }
+  .dock .l { font-size: 12px; color: var(--muted); }
+  .dock .w { font-size: 22px; font-weight: 300; color: var(--gold-text); line-height: 1.2; }
+  .dock .p { font-size: 13px; text-align: right; }
+  .dock a { color: inherit; text-decoration: none; display: contents; }
+  .wrap { padding-bottom: 110px; }
+}
+[hidden] { display: none !important; }
+
+@media print {
+  :root, :root[data-theme="dark"], :root:not([data-theme="light"]) {
+    --bg: #FFFFFF; --surface: #FFFFFF; --ink: #191816; --muted: #5F5A52;
+    --line: #D5D0C4; --gold-text: #8A6A2B; --silver: #5B7C9E; --silver-text: #48647F; --neg: #A4432F; --pos: #3F7A4E;
+  }
+  @page { size: A4; margin: 16mm 15mm; }
+  body { font-size: 11pt; }
+  .no-print, .tip, .dock { display: none !important; }
+  .logo-hell { display: none !important; }
+  .logo-dunkel { display: block !important; }
+  .wrap { padding: 0; max-width: none; }
+  .layout { display: block; }
+  header.top { padding-top: 0; padding-bottom: 14px; margin-bottom: 20px; }
+  .logo { height: 56px; }
+  .sub { margin-bottom: 20px; }
+  section.block { padding: 16px 0; break-inside: avoid; }
+  .kpi { break-inside: avoid; padding: 12px 14px; }
+  .kpis { grid-template-columns: repeat(3, 1fr); }
+  .kpi .value { font-size: 24px; }
+  .r { padding: 9px 14px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <img class="logo logo-dunkel" src="assets/logodunkel.png" alt="Thomas Fiebig · Edelmetallfachberater">
+    <img class="logo logo-hell" src="assets/logohell.png" alt="Thomas Fiebig · Edelmetallfachberater">
+    <div class="actions no-print">
+      <button type="button" id="themeBtn" aria-label="Hell/Dunkel umschalten">Hell / Dunkel</button>
+      <button type="button" class="primary" id="printBtn">Drucken / PDF</button>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- Eingaben -->
+    <form class="panel no-print" id="form" autocomplete="off">
+      <h2>Eingaben</h2>
+      <p class="hint">Werte eintragen, das Ergebnis rechnet sofort mit.</p>
+
+      <fieldset>
+        <legend>Zeitraum</legend>
+        <div class="field">
+          <label for="startJahr">Investiert ab Jahresanfang</label>
+          <select id="startJahr"></select>
+          <p class="hint" id="vorJahren"></p>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Gewichtung</legend>
+        <div class="weight-head"><span class="g" id="wGoldTxt"></span><span class="s" id="wSilberTxt"></span></div>
+        <input type="range" id="wGold" min="0" max="100" step="5" value="50" aria-label="Anteil Gold in Prozent">
+        <div class="presets">
+          <button type="button" class="small" data-w="100">100 / 0</button>
+          <button type="button" class="small" data-w="80">80 / 20</button>
+          <button type="button" class="small" data-w="70">70 / 30</button>
+          <button type="button" class="small" data-w="50">50 / 50</button>
+          <button type="button" class="small" data-w="0">0 / 100</button>
+        </div>
+        <p class="hint">Jeder Kauf wird in diesem Verhältnis auf Gold und Silber aufgeteilt (Gold / Silber in %).</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Kaufart</legend>
+        <div class="seg" role="radiogroup" aria-label="Kaufart">
+          <input type="radio" name="modus" id="mEinmal" value="einmal" checked><label for="mEinmal">Einmalkauf</label>
+          <input type="radio" name="modus" id="mSpar" value="spar"><label for="mSpar">Sparplan</label>
+          <input type="radio" name="modus" id="mBeides" value="beides"><label for="mBeides">Beides</label>
+        </div>
+      </fieldset>
+
+      <fieldset id="fsEinmal">
+        <legend>Einmalkauf</legend>
+        <div class="field">
+          <label for="einmal">Betrag zu Beginn (€)</label>
+          <input type="number" inputmode="decimal" id="einmal" value="10000" min="0" step="1000">
+        </div>
+        <span class="lbl">Zukäufe (jeweils zum Jahresanfang)</span>
+        <div id="zukaeufe"></div>
+        <button type="button" class="small" id="zkAdd">+ Zukauf hinzufügen</button>
+      </fieldset>
+
+      <fieldset id="fsSpar" hidden>
+        <legend>Sparplan</legend>
+        <div class="row2">
+          <div class="field">
+            <label for="rate">Monatsrate (€)</label>
+            <input type="number" inputmode="decimal" id="rate" value="100" min="0" step="25">
+          </div>
+          <div class="field">
+            <label for="dyn">Erhöhung p. a. (%)</label>
+            <input type="number" inputmode="decimal" id="dyn" value="0" min="0" max="20" step="1">
+          </div>
+        </div>
+        <p class="hint">Kauf jeweils zum Monatsanfang, bis heute. Die Erhöhung greift jedes Jahr im Januar.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Kurse heute (€ je Unze)</legend>
+        <div class="row2">
+          <div class="field"><span class="lbl">Gold</span><strong id="goldTxt"></strong></div>
+          <div class="field"><span class="lbl">Silber</span><strong id="silberTxt"></strong></div>
+        </div>
+        <input type="hidden" id="goldHeute" value="3709.20">
+        <input type="hidden" id="silberHeute" value="50.75">
+        <p class="hint" id="kursStand">Kursstand wird geladen …</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Vergleich Konto</legend>
+        <div class="field">
+          <label for="zins">Zins auf dem Konto p. a. (%)</label>
+          <input type="number" inputmode="decimal" id="zins" value="0" min="0" max="15" step="0.1">
+        </div>
+        <p class="hint">Dasselbe Geld zu denselben Zeitpunkten aufs Konto gelegt. 0 % = Girokonto, für Sparbuch oder Tagesgeld einen Durchschnittszins eintragen.</p>
+      </fieldset>
+    </form>
+
+    <!-- Ergebnis -->
+    <main id="ergebnis">
+      <p class="eyebrow">Rückrechnung Gold &amp; Silber · <span id="stand"></span></p>
+      <h1>Was wäre es heute wert?</h1>
+      <p class="sub" id="kundeZeile"></p>
+
+      <div class="kpis">
+        <div class="kpi">
+          <div class="label">Eingezahlt</div>
+          <div class="value" id="kpiEin"></div>
+          <div class="subline" id="kpiEinSub"></div>
+        </div>
+        <div class="kpi accent">
+          <div class="label">Wert heute</div>
+          <div class="value" id="kpiWert"></div>
+          <div class="subline" id="kpiWertSub"></div>
+        </div>
+        <div class="kpi">
+          <div class="label">Wertzuwachs</div>
+          <div class="value" id="kpiPlus"></div>
+          <div class="subline" id="kpiPlusSub"></div>
+        </div>
+      </div>
+
+      <section class="block">
+        <p class="eyebrow">01</p>
+        <h2>Ihr Bestand heute</h2>
+        <p class="lead" id="bestandLead"></p>
+        <div class="rows" id="bestand"></div>
+      </section>
+
+      <section class="block">
+        <p class="eyebrow">02</p>
+        <h2>Und auf dem Konto?</h2>
+        <p class="lead" id="kontoLead"></p>
+        <div class="rows" id="konto"></div>
+        <p class="callout" id="kontoFazit"></p>
+      </section>
+
+      <section class="block">
+        <p class="eyebrow">03</p>
+        <h2>Verlauf seit <span id="verlaufStart"></span></h2>
+        <div class="legend">
+          <span><i class="g"></i>Gold</span>
+          <span><i class="s"></i>Silber</span>
+          <span><i class="e"></i>Eingezahlt</span>
+          <span><i class="k"></i>Konto</span>
+        </div>
+        <div class="chartbox" id="chartbox">
+          <svg class="chart" id="chart" viewBox="0 0 720 300" role="img" aria-label="Depotwert Gold und Silber gestapelt, dazu eingezahlte Summe"></svg>
+          <div class="tip" id="tip" hidden></div>
+        </div>
+      </section>
+
+      <section class="block no-print">
+        <details>
+          <summary>Jahreswerte</summary>
+          <div class="tablewrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Jahr</th><th>Gold<br>€/oz</th><th>Silber<br>€/oz</th><th>Eingezahlt</th>
+                  <th>Wert<br>Gold</th><th>Wert<br>Silber</th><th>Gesamt</th><th>Gewinn /<br>Verlust</th><th>Konto</th><th>Inflation</th>
+                </tr>
+              </thead>
+              <tbody id="jahre"></tbody>
+            </table>
+          </div>
+        </details>
+      </section>
+
+      <section class="block">
+        <p class="eyebrow">04</p>
+        <h2>Annahmen dieser Rechnung</h2>
+        <ul class="notes" id="annahmen"></ul>
+      </section>
+
+      <section class="block">
+        <p class="eyebrow">Ihr Ansprechpartner</p>
+        <h2>Thomas Fiebig <span style="font-weight:400;color:var(--muted)">· Zertifizierter Edelmetallfachberater</span></h2>
+        <dl class="contact">
+          <dt>Mobil</dt><dd>0160 / 96 43 22 46</dd>
+          <dt>E-Mail</dt><dd>beratung@fiebig-edelmetallfachberater.com</dd>
+          <dt>Web</dt><dd>fiebig-edelmetallfachberater.com</dd>
+        </dl>
+        <p class="disclaimer">Rückrechnung mit historischen Werten und den genannten Annahmen. Keine Finanz-, Anlage- oder Steuerberatung. Wertentwicklungen der Vergangenheit sind kein verlässlicher Indikator für die Zukunft. Alle Angaben ohne Gewähr.</p>
+      </section>
+    </main>
+  </div>
+</div>
+
+<div class="dock" id="dock" aria-live="polite">
+  <div><div class="l">Wert heute</div><div class="w" id="dockWert"></div></div>
+  <div class="p"><div class="l" id="dockEin"></div><div id="dockPlus"></div></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // Goldpreis in Euro je Feinunze, Schlusskurs zum Jahresende (Quelle: gold.de, vor 1999 aus ECU/DM umgerechnet)
+  var GOLD = {
+    1978: 164.14, 1979: 354.84, 1980: 448.00, 1981: 368.16, 1982: 470.98, 1983: 462.95, 1984: 433.55,
+    1985: 368.27, 1986: 365.16, 1987: 374.75, 1988: 352.60, 1989: 331.09, 1990: 287.10, 1991: 264.87,
+    1992: 275.58, 1993: 350.87, 1994: 312.58, 1995: 302.82, 1996: 298.14, 1997: 262.98, 1998: 246.36,
+    1999: 289.56, 2000: 292.79, 2001: 314.24, 2002: 332.60, 2003: 332.34, 2004: 320.25, 2005: 433.53,
+    2006: 480.79, 2007: 567.33, 2008: 614.49, 2009: 760.70, 2010: 1059.19, 2011: 1201.63, 2012: 1259.57,
+    2013: 867.14, 2014: 987.10, 2015: 971.90, 2016: 1095.28, 2017: 1084.83, 2018: 1119.42, 2019: 1352.78,
+    2020: 1539.86, 2021: 1602.77, 2022: 1704.92, 2023: 1868.90, 2024: 2504.25, 2025: 3693.55
+  };
+  // Jahresschlusskurse in US-Dollar je Feinunze (London-Fixing bzw. gold.de), nur für das Gold-Silber-Verhältnis
+  var GOLD_USD = {
+    1978: 226.00, 1979: 512.00, 1980: 589.75, 1981: 397.50, 1982: 456.90, 1983: 382.40, 1984: 308.30,
+    1985: 326.80, 1986: 390.90, 1987: 486.50, 1988: 410.15, 1989: 401.00, 1990: 386.20, 1991: 353.15,
+    1992: 333.00, 1993: 391.75, 1994: 383.25, 1995: 387.00, 1996: 369.25, 1997: 290.20, 1998: 287.45,
+    1999: 290.25, 2000: 272.65, 2001: 276.50, 2002: 342.75, 2003: 417.25, 2004: 435.60, 2005: 513.00,
+    2006: 632.00, 2007: 833.75, 2008: 869.75, 2009: 1087.50, 2010: 1405.50, 2011: 1531.00, 2012: 1657.50,
+    2013: 1204.50, 2014: 1206.00, 2015: 1060.00, 2016: 1145.90, 2017: 1296.50, 2018: 1279.00, 2019: 1514.75,
+    2020: 1887.60, 2021: 1805.85, 2022: 1812.35, 2023: 2062.40, 2024: 2609.10, 2025: 4338.84
+  };
+  var SILBER_USD = {
+    1978: 6.06, 1979: 31.60, 1980: 15.20, 1981: 8.04, 1982: 10.95, 1983: 8.93, 1984: 6.34,
+    1985: 5.89, 1986: 5.36, 1987: 6.70, 1988: 6.04, 1989: 5.21, 1990: 4.17, 1991: 3.88,
+    1992: 3.69, 1993: 5.12, 1994: 4.86, 1995: 5.15, 1996: 4.80, 1997: 6.00, 1998: 4.98,
+    1999: 5.33, 2000: 4.57, 2001: 4.59, 2002: 4.67, 2003: 5.96, 2004: 6.82, 2005: 8.83,
+    2006: 12.90, 2007: 14.76, 2008: 10.83, 2009: 16.99, 2010: 30.63, 2011: 28.18, 2012: 29.95,
+    2013: 19.50, 2014: 15.97, 2015: 13.82, 2016: 16.24, 2017: 16.87, 2018: 15.47, 2019: 17.85,
+    2020: 26.49, 2021: 23.09, 2022: 23.95, 2023: 23.79, 2024: 28.94, 2025: 76.25
+  };
+  // Silber in Euro = Gold in Euro × Silber/Gold in Dollar, damit beide Reihen dieselbe Euro-Umrechnung haben
+  var SILBER = {};
+  Object.keys(GOLD).forEach(function (y) { SILBER[y] = GOLD[y] * SILBER_USD[y] / GOLD_USD[y]; });
+
+  // Inflationsrate Deutschland in % zum Vorjahr (Verbraucherpreisindex, Statistisches Bundesamt; bis 1991 früheres Bundesgebiet)
+  var INFL = {
+    1979: 4.1, 1980: 5.4, 1981: 6.3, 1982: 5.3, 1983: 3.3, 1984: 2.4, 1985: 2.1, 1986: -0.1, 1987: 0.2,
+    1988: 1.3, 1989: 2.8, 1990: 2.7, 1991: 3.6, 1992: 5.0, 1993: 4.5, 1994: 2.7, 1995: 1.9, 1996: 1.4,
+    1997: 1.9, 1998: 0.8, 1999: 0.7, 2000: 1.3, 2001: 2.0, 2002: 1.4, 2003: 1.0, 2004: 1.6, 2005: 1.6,
+    2006: 1.6, 2007: 2.3, 2008: 2.6, 2009: 0.3, 2010: 1.0, 2011: 2.2, 2012: 1.9, 2013: 1.5, 2014: 1.0,
+    2015: 0.5, 2016: 0.5, 2017: 1.5, 2018: 1.8, 2019: 1.4, 2020: 0.5, 2021: 3.1, 2022: 6.9, 2023: 5.9,
+    2024: 2.2, 2025: 2.2
+  };
+  // Für das laufende Jahr gibt es noch keine Jahresrate, daher Annahme
+  var INFL_LAUFEND = 2.0;
+  var inflation = function (jahr) { return INFL[jahr] != null ? INFL[jahr] : INFL_LAUFEND; };
+
+  var MIN_JAHR = 1979, LETZTES = 2025;
+  var SAVE_KEY = 'edelmetall-rueckrechner';
+  var HEUTE = new Date();
+  var HEUTE_JAHR = HEUTE.getFullYear();
+  // Monate vom Ende des letzten Datenjahres bis heute
+  var K = Math.max(0.01, (HEUTE - new Date(LETZTES + 1, 0, 1)) / (864e5 * 30.436875));
+
+  var $ = function (id) { return document.getElementById(id); };
+  var eur0 = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  var eur2 = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  var num1 = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  var num2 = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 2 });
+  var int0 = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 });
+  var pct1 = function (v) { return (v < 0 ? '−' : '') + num1.format(Math.abs(v)) + ' %'; };
+  var vz = function (v) { return (v > 0 ? '+ ' : v < 0 ? '− ' : '') + eur0.format(Math.abs(v)); };
+  var val = function (id) { var v = parseFloat($(id).value); return isFinite(v) ? v : 0; };
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var gramm = function (oz) { var g = oz * 31.1035; return g >= 1000 ? num2.format(g / 1000) + ' kg' : int0.format(g) + ' g'; };
+
+  // Kurs innerhalb eines Jahres: gleichmäßig (geometrisch) zwischen den Schlusskursen verteilt
+  function kurs(reihe, heute, jahr, monat) {
+    if (jahr <= LETZTES) return reihe[jahr - 1] * Math.pow(reihe[jahr] / reihe[jahr - 1], monat / 12);
+    var j = (jahr - LETZTES - 1) * 12 + monat;
+    return reihe[LETZTES] * Math.pow(heute / reihe[LETZTES], j / K);
+  }
+
+  function berechne(e, w) {
+    // konto: dieselben Einzahlungen mit Zins; kk: Einzahlungen mit der Inflation fortgeschrieben (nötig für gleiche Kaufkraft)
+    var ozG = 0, ozS = 0, ein = 0, konto = 0, kk = 0, cfs = [], t = 0, punkte = [];
+    function kauf(betrag, pG, pS) {
+      if (!(betrag > 0)) return;
+      ozG += betrag * w / pG;
+      ozS += betrag * (1 - w) / pS;
+      ein += betrag;
+      konto += betrag;
+      kk += betrag;
+      cfs.push({ t: t, a: betrag });
+    }
+    function monat(jahr, m) {
+      var pG = kurs(GOLD, e.goldHeute, jahr, m), pS = kurs(SILBER, e.silberHeute, jahr, m);
+      if (m === 0) {
+        if (jahr === e.start) kauf(e.einmal, pG, pS);
+        e.zukaeufe.forEach(function (z) { if (z.jahr === jahr) kauf(z.betrag, pG, pS); });
+      }
+      if (e.rate > 0) kauf(e.rate * Math.pow(1 + e.dyn / 100, jahr - e.start), pG, pS);
+      if (t === 0) punkte.push({ t: 0, label: 'Anfang ' + e.start, ein: ein, g: ozG * pG, s: ozS * pS, pG: pG, pS: pS, konto: konto, kk: kk });
+      konto *= 1 + e.zins / 100 / 12;
+      kk *= Math.pow(1 + inflation(jahr) / 100, 1 / 12);
+      t++;
+    }
+    for (var y = e.start; y <= LETZTES; y++) {
+      for (var m = 0; m < 12; m++) monat(y, m);
+      punkte.push({ t: t, jahr: y, label: String(y), ein: ein, g: ozG * GOLD[y], s: ozS * SILBER[y], pG: GOLD[y], pS: SILBER[y], konto: konto, kk: kk, infl: INFL[y] });
+    }
+    var j0 = Math.max(0, (e.start - LETZTES - 1) * 12);
+    for (var j = j0; j < K; j++) monat(LETZTES + 1 + Math.floor(j / 12), j % 12);
+    var T = t - Math.ceil(K - j0) + (K - j0);
+    var wert = ozG * e.goldHeute + ozS * e.silberHeute;
+    punkte.push({ t: T, label: 'heute', ein: ein, g: ozG * e.goldHeute, s: ozS * e.silberHeute, pG: e.goldHeute, pS: e.silberHeute, heute: true, konto: konto, kk: kk });
+    return { ozG: ozG, ozS: ozS, ein: ein, wert: wert, konto: konto, kk: kk, g: ozG * e.goldHeute, s: ozS * e.silberHeute, punkte: punkte, T: T, pa: rendite(cfs, T, wert) };
+  }
+
+  // Rendite p. a. über alle Einzahlungen (interner Zinsfuß, monatlich gesucht)
+  function rendite(cfs, T, wert) {
+    if (!cfs.length || !(wert > 0)) return null;
+    var f = function (r) { return cfs.reduce(function (s, c) { return s + c.a * Math.pow(1 + r, T - c.t); }, 0) - wert; };
+    var lo = -0.5, hi = 0.5;
+    if (f(lo) > 0 || f(hi) < 0) return null;
+    for (var i = 0; i < 80; i++) { var mid = (lo + hi) / 2; if (f(mid) > 0) hi = mid; else lo = mid; }
+    return (Math.pow(1 + (lo + hi) / 2, 12) - 1) * 100;
+  }
+
+  function zeile(k, v, opt) {
+    opt = opt || {};
+    return '<div class="r' + (opt.sum ? ' sum' : '') + '"><div class="k">' + k +
+      (opt.note ? '<small>' + opt.note + '</small>' : '') + '</div><div class="v">' + v + '</div></div>';
+  }
+
+  var chartPunkte = [], chartGeo = null;
+  function chart(r) {
+    var W = 720, H = 300, L = 76, R = 12, T0 = 12, B = 26;
+    var pts = r.punkte;
+    chartPunkte = pts;
+    var max = Math.max.apply(null, pts.map(function (p) { return Math.max(p.ein, p.g + p.s, p.konto); })) || 1;
+    var roh = max / 4, pot = Math.pow(10, Math.floor(Math.log10(roh)));
+    var step = [1, 2, 2.5, 5, 10].map(function (f) { return f * pot; }).filter(function (s) { return s >= roh; })[0];
+    var top = step * Math.ceil(max / step);
+    var x = function (t) { return L + (W - L - R) * t / (r.T || 1); };
+    var y = function (v) { return T0 + (H - T0 - B) * (1 - v / top); };
+    chartGeo = { x: x, W: W, L: L, R: R, T0: T0, B: B, H: H };
+    var s = '';
+    for (var g = 0; g <= top + 1e-9; g += step) {
+      s += '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + y(g) + '" y2="' + y(g) + '"/>' +
+        '<text x="' + (L - 8) + '" y="' + (y(g) + 4) + '" text-anchor="end">' + int0.format(g) + ' €</text>';
+    }
+    var jahrPts = pts.filter(function (p) { return p.jahr; });
+    var jeN = Math.max(1, Math.ceil(jahrPts.length / 8));
+    for (var i = jahrPts.length - 1; i >= 0; i -= jeN) {
+      if (r.T - jahrPts[i].t < r.T * 0.06) continue;
+      s += '<text x="' + x(jahrPts[i].t) + '" y="' + (H - 6) + '" text-anchor="middle">' + jahrPts[i].label + '</text>';
+    }
+    s += '<text x="' + x(r.T) + '" y="' + (H - 6) + '" text-anchor="end">heute</text>';
+    var linie = function (f) { return pts.map(function (p, i) { return (i ? 'L' : 'M') + x(p.t).toFixed(1) + ' ' + y(f(p)).toFixed(1); }).join(' '); };
+    var boden = 'L' + x(r.T).toFixed(1) + ' ' + y(0) + ' L' + x(0) + ' ' + y(0) + ' Z';
+    var oberS = linie(function (p) { return p.s; });
+    var oberG = linie(function (p) { return p.s + p.g; });
+    var rueckS = pts.slice().reverse().map(function (p) { return 'L' + x(p.t).toFixed(1) + ' ' + y(p.s).toFixed(1); }).join(' ');
+    s += '<path class="a-s" d="' + oberS + ' ' + boden + '"/>';
+    s += '<path class="a-g" d="' + oberG + ' ' + rueckS + ' Z"/>';
+    s += '<path class="edge" d="' + oberS + '"/>';
+    s += '<path class="l-ein" d="' + linie(function (p) { return p.ein; }) + '"/>';
+    s += '<path class="l-konto" d="' + linie(function (p) { return p.konto; }) + '"/>';
+    s += '<line class="cross" id="cross" x1="0" x2="0" y1="' + T0 + '" y2="' + (H - B) + '" visibility="hidden"/>';
+    s += '<rect class="hit" x="' + L + '" y="0" width="' + (W - L - R) + '" height="' + (H - B) + '"/>';
+    $('chart').innerHTML = s;
+  }
+
+  function zeigeTip(ev) {
+    if (!chartGeo || !chartPunkte.length) return;
+    var svg = $('chart'), box = svg.getBoundingClientRect();
+    var sx = (ev.clientX - box.left) * chartGeo.W / box.width;
+    var best = chartPunkte[0], d = Infinity;
+    chartPunkte.forEach(function (p) { var dd = Math.abs(chartGeo.x(p.t) - sx); if (dd < d) { d = dd; best = p; } });
+    var cx = chartGeo.x(best.t);
+    var cross = $('cross');
+    cross.setAttribute('x1', cx); cross.setAttribute('x2', cx); cross.setAttribute('visibility', 'visible');
+    var sum = best.g + best.s, diff = sum - best.ein;
+    var tip = $('tip');
+    tip.innerHTML = '<b>' + (best.heute ? 'Heute' : best.jahr ? 'Ende ' + best.label : best.label) + '</b>' +
+      '<div><span><span class="dot g"></span>Gold</span><span>' + eur0.format(best.g) + '</span></div>' +
+      '<div><span><span class="dot s"></span>Silber</span><span>' + eur0.format(best.s) + '</span></div>' +
+      '<div><span>Gesamt</span><span><strong>' + eur0.format(sum) + '</strong></span></div>' +
+      '<div><span>Eingezahlt</span><span>' + eur0.format(best.ein) + '</span></div>' +
+      '<div><span>Konto</span><span>' + eur0.format(best.konto) + '</span></div>' +
+      '<div><span>Differenz</span><span class="' + (diff < 0 ? 'neg' : 'pos') + '">' + vz(diff) + '</span></div>';
+    tip.hidden = false;
+    var px = cx * box.width / chartGeo.W, tw = tip.offsetWidth;
+    tip.style.left = Math.max(0, Math.min(box.width - tw, px + (px > box.width / 2 ? -tw - 12 : 12))) + 'px';
+  }
+  function versteckeTip() { $('tip').hidden = true; var c = $('cross'); if (c) c.setAttribute('visibility', 'hidden'); }
+
+  function modus() { return document.querySelector('input[name="modus"]:checked').value; }
+
+  function eingaben() {
+    var mo = modus();
+    var mitEinmal = mo !== 'spar', mitSpar = mo !== 'einmal';
+    var start = parseInt($('startJahr').value, 10);
+    var zk = [];
+    if (mitEinmal) {
+      document.querySelectorAll('.zk-row').forEach(function (row) {
+        var jahr = parseInt(row.querySelector('select').value, 10);
+        var betrag = parseFloat(row.querySelector('input').value);
+        if (jahr >= start && betrag > 0) zk.push({ jahr: jahr, betrag: betrag });
+      });
+    }
+    return {
+      start: start, w: val('wGold') / 100, modus: mo,
+      einmal: mitEinmal ? Math.max(0, val('einmal')) : 0, zukaeufe: zk,
+      rate: mitSpar ? Math.max(0, val('rate')) : 0, dyn: mitSpar ? Math.max(0, val('dyn')) : 0,
+      goldHeute: Math.max(1, val('goldHeute')), silberHeute: Math.max(0.1, val('silberHeute')),
+      zins: Math.max(0, val('zins'))
+    };
+  }
+
+  function render() {
+    var e = eingaben();
+    $('fsEinmal').hidden = e.modus === 'spar';
+    $('fsSpar').hidden = e.modus === 'einmal';
+    var wg = Math.round(e.w * 100);
+    $('wGoldTxt').textContent = 'Gold ' + wg + ' %';
+    $('wSilberTxt').textContent = 'Silber ' + (100 - wg) + ' %';
+    var vor = HEUTE_JAHR - e.start;
+    $('vorJahren').textContent = vor > 0 ? 'Das ist vor ' + vor + (vor === 1 ? ' Jahr' : ' Jahren') + '.' : 'Seit Anfang dieses Jahres.';
+    syncZkJahre(e.start);
+
+    var r = berechne(e, e.w);
+    var plus = r.wert - r.ein;
+
+    var teile = [];
+    if (e.einmal > 0) teile.push(eur0.format(e.einmal) + ' einmalig');
+    if (e.zukaeufe.length) teile.push(e.zukaeufe.length + (e.zukaeufe.length === 1 ? ' Zukauf' : ' Zukäufe'));
+    if (e.rate > 0) teile.push(eur0.format(e.rate) + '/Monat' + (e.dyn > 0 ? ' (+' + num1.format(e.dyn) + ' % p. a.)' : ''));
+    var anlage = teile.join(', ') || 'kein Betrag';
+    var gewichtung = wg + ' % Gold / ' + (100 - wg) + ' % Silber';
+    $('stand').textContent = HEUTE.toLocaleDateString('de-DE');
+    $('kundeZeile').textContent = 'Anfang ' + e.start + ' (vor ' + vor + ' Jahren) · ' + anlage + ' · ' + gewichtung;
+    $('verlaufStart').textContent = e.start;
+
+    $('kpiEin').textContent = eur0.format(r.ein);
+    $('kpiEinSub').textContent = 'seit Anfang ' + e.start;
+    $('kpiWert').textContent = eur0.format(r.wert);
+    $('kpiWertSub').textContent = 'zum Kurs von heute';
+    $('dockWert').textContent = eur0.format(r.wert);
+    $('dockEin').textContent = 'eingezahlt ' + eur0.format(r.ein);
+    $('dockPlus').textContent = vz(plus) + (r.pa != null ? ' · ' + pct1(r.pa) + ' p. a.' : '');
+    $('dockPlus').className = plus < 0 ? 'neg' : '';
+    $('kpiPlus').textContent = vz(plus);
+    $('kpiPlus').className = 'value' + (plus < 0 ? ' neg' : '');
+    $('kpiPlusSub').textContent = r.ein > 0
+      ? pct1(plus / r.ein * 100) + ' auf das eingezahlte Geld' + (r.pa != null ? ' · ' + pct1(r.pa) + ' pro Jahr' : '')
+      : '';
+
+    $('bestandLead').textContent = 'Gekauft ' + gewichtung + ', bewertet mit den Kursen von heute.';
+    $('bestand').innerHTML =
+      zeile('<span class="dot g"></span>Gold', eur0.format(r.g),
+        { note: gramm(r.ozG) + ' · ' + num2.format(r.ozG) + ' Unzen · Kurs ' + eur2.format(e.goldHeute) + '/oz' }) +
+      zeile('<span class="dot s"></span>Silber', eur0.format(r.s),
+        { note: gramm(r.ozS) + ' · ' + num2.format(r.ozS) + ' Unzen · Kurs ' + eur2.format(e.silberHeute) + '/oz' }) +
+      zeile('Gesamtwert heute', eur0.format(r.wert) + ' &nbsp;(' + vz(plus) + ')', { sum: true, note: 'eingezahlt ' + eur0.format(r.ein) });
+
+    // Vergleich Konto und Kaufkraft
+    var kontoTxt = e.zins > 0 ? 'mit ' + num2.format(e.zins) + ' % Zins' : 'ohne Zinsen';
+    var verlust = r.kk - r.konto;
+    $('kontoLead').textContent = 'Dasselbe Geld zu denselben Zeitpunkten auf dem Konto, ' + kontoTxt + ':';
+    $('konto').innerHTML =
+      zeile('Kontostand heute', eur0.format(r.konto), { note: 'eingezahlt ' + eur0.format(r.ein) + ', ' + kontoTxt }) +
+      zeile('Nötig für gleiche Kaufkraft', eur0.format(r.kk), { note: 'so viel bräuchte man heute, um mit dem eingezahlten Geld genauso viel kaufen zu können wie damals' }) +
+      zeile(verlust > 0 ? 'Kaufkraftverlust durch Inflation' : 'Kaufkraft erhalten', '<span class="' + (verlust > 0 ? 'neg' : 'pos') + '">' + vz(-verlust) + '</span>',
+        { note: verlust > 0 ? 'so viel ist das Geld auf dem Konto heute weniger wert' : 'die Zinsen haben die Inflation ausgeglichen' }) +
+      zeile('Gold &amp; Silber heute', '<span class="' + (r.wert >= r.kk ? 'pos' : 'neg') + '">' + eur0.format(r.wert) + '</span>', { sum: true, note: (r.wert >= r.kk ? 'über' : 'unter') + ' der Summe für gleiche Kaufkraft: ' + vz(r.wert - r.kk) });
+    $('kontoFazit').textContent = r.ein > 0
+      ? (verlust > 0
+        ? 'Auf dem Konto hätten die ' + eur0.format(r.ein) + ' real rund ' + eur0.format(verlust) + ' an Kaufkraft verloren. '
+        : 'Auf dem Konto wäre die Kaufkraft in diesem Zeitraum erhalten geblieben. ') +
+        'Gold und Silber liegen heute bei ' + eur0.format(r.wert) + ', das sind ' + eur0.format(Math.abs(r.wert - r.konto)) + (r.wert >= r.konto ? ' mehr' : ' weniger') + ' als auf dem Konto.'
+      : 'Bitte einen Betrag eingeben.';
+
+    chart(r);
+    versteckeTip();
+
+    // Jahrestabelle
+    $('jahre').innerHTML = r.punkte.slice(1).map(function (p) {
+      var sum = p.g + p.s, d = sum - p.ein;
+      return '<tr><td>' + (p.heute ? 'heute' : p.label) + '</td><td>' + eur2.format(p.pG) + '</td><td>' + eur2.format(p.pS) +
+        '</td><td>' + eur0.format(p.ein) + '</td><td>' + eur0.format(p.g) + '</td><td>' + eur0.format(p.s) +
+        '</td><td>' + eur0.format(sum) + '</td><td class="' + (d < 0 ? 'neg' : '') + '">' + vz(d) + '</td><td>' + eur0.format(p.konto) +
+        '</td><td>' + (p.infl != null ? pct1(p.infl) : '') + '</td></tr>';
+    }).join('');
+
+    var a = [];
+    a.push('Zeitraum von Anfang ' + e.start + ' bis heute (' + HEUTE.toLocaleDateString('de-DE') + '). Jeder Kauf wird zu ' + gewichtung + ' aufgeteilt, ohne spätere Umschichtung.');
+    if (e.einmal > 0 || e.zukaeufe.length) a.push('Einmalkauf und Zukäufe jeweils zum Jahresanfang.');
+    if (e.rate > 0) a.push('Sparplan: Kauf zum Monatsanfang' + (e.dyn > 0 ? ', Rate steigt jedes Jahr um ' + num1.format(e.dyn) + ' %.' : '.'));
+    a.push('Gold: Jahresschlusskurse in Euro je Feinunze (gold.de). Silber in Euro über das Gold-Silber-Verhältnis der Jahresschlusskurse in Dollar abgeleitet, damit beide Metalle dieselbe Euro-Umrechnung haben; Abweichungen zu anderen Quellen sind möglich.');
+    a.push('Kaufkurse innerhalb eines Jahres gleichmäßig zwischen den Jahresschlusskursen verteilt; tatsächliche Monatskurse weichen davon ab. Für ' + (LETZTES + 1) + ' verläuft die Kurve vom Schlusskurs ' + LETZTES + ' bis zum heutigen Kurs.');
+    a.push('Heutige Kurse: Gold ' + eur2.format(e.goldHeute) + ', Silber ' + eur2.format(e.silberHeute) + ' je Unze.');
+    a.push('Kauf zum Börsenkurs, ohne Händlerspanne, Mehrwertsteuer und Lagerkosten.');
+    a.push('Konto: dieselben Einzahlungen ' + kontoTxt + (e.zins > 0 ? ', monatlich verzinst, ohne Steuern auf die Zinsen.' : '.') +
+      ' Kaufkraft über den Verbraucherpreisindex für Deutschland (Statistisches Bundesamt' + (e.start < 1992 ? ', bis 1991 früheres Bundesgebiet' : '') +
+      '); für ' + HEUTE_JAHR + ' vorläufig ' + num1.format(INFL_LAUFEND) + ' % pro Jahr angenommen.');
+    a.push('Bewertung zum Kurs, ohne Abschlag beim Verkauf. Rendite pro Jahr als interner Zinsfuß über alle Einzahlungen.');
+    $('annahmen').innerHTML = a.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('');
+  }
+
+  // Zukäufe
+  function jahrOptionen(von, sel) {
+    var o = '';
+    for (var y = von; y <= HEUTE_JAHR; y++) o += '<option' + (y === sel ? ' selected' : '') + '>' + y + '</option>';
+    return o;
+  }
+  function zkZeile(jahr, betrag) {
+    var row = document.createElement('div');
+    row.className = 'zk-row';
+    row.innerHTML = '<select aria-label="Jahr des Zukaufs">' + jahrOptionen(parseInt($('startJahr').value, 10), jahr) + '</select>' +
+      '<input type="number" inputmode="decimal" min="0" step="500" value="' + betrag + '" aria-label="Betrag des Zukaufs in Euro">' +
+      '<button type="button" aria-label="Zukauf entfernen">×</button>';
+    row.querySelector('button').addEventListener('click', function () { row.remove(); render(); });
+    $('zukaeufe').appendChild(row);
+  }
+  function syncZkJahre(start) {
+    document.querySelectorAll('.zk-row select').forEach(function (s) {
+      var cur = parseInt(s.value, 10);
+      if (parseInt(s.options[0].value, 10) !== start) s.innerHTML = jahrOptionen(start, Math.max(cur, start));
+    });
+  }
+  $('zkAdd').addEventListener('click', function () {
+    var start = parseInt($('startJahr').value, 10);
+    var rows = document.querySelectorAll('.zk-row select');
+    var letztes = rows.length ? parseInt(rows[rows.length - 1].value, 10) : start;
+    zkZeile(Math.min(HEUTE_JAHR, letztes + 5), 5000);
+    render();
+  });
+
+  // Jahresauswahl
+  var optionen = '';
+  for (var y = HEUTE_JAHR; y >= MIN_JAHR; y--) optionen += '<option value="' + y + '">' + y + ' (vor ' + (HEUTE_JAHR - y) + ' J.)</option>';
+  $('startJahr').innerHTML = optionen;
+  $('startJahr').value = HEUTE_JAHR - 20;
+
+  // Kurse und Aufschläge bleiben im Browser gespeichert
+  var saveFelder = document.querySelectorAll('[data-save]');
+  try {
+    var gespeichert = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}');
+    saveFelder.forEach(function (f) { if (gespeichert[f.id] != null) f.value = gespeichert[f.id]; });
+  } catch (err) {}
+  function speichern() {
+    var o = {};
+    saveFelder.forEach(function (f) { o[f.id] = f.value; });
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(o)); } catch (err) {}
+  }
+
+  document.querySelectorAll('[data-w]').forEach(function (b) {
+    b.addEventListener('click', function () { $('wGold').value = b.getAttribute('data-w'); render(); });
+  });
+  $('form').addEventListener('input', function (ev) {
+    if (ev.target.hasAttribute('data-save')) speichern();
+    render();
+  });
+  $('form').addEventListener('change', render);
+  $('form').addEventListener('submit', function (ev) { ev.preventDefault(); });
+  $('chart').addEventListener('pointermove', zeigeTip);
+  $('chart').addEventListener('pointerdown', zeigeTip);
+  $('chart').addEventListener('pointerleave', function (ev) { if (ev.pointerType === 'mouse') versteckeTip(); });
+  $('printBtn').addEventListener('click', function () { window.print(); });
+  $('themeBtn').addEventListener('click', function () {
+    var root = document.documentElement;
+    var dunkel = root.getAttribute('data-theme')
+      ? root.getAttribute('data-theme') === 'dark'
+      : window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.setAttribute('data-theme', dunkel ? 'light' : 'dark');
+  });
+
+  function zeigeKurse(stand) {
+    $('goldTxt').textContent = eur2.format(val('goldHeute'));
+    $('silberTxt').textContent = eur2.format(val('silberHeute'));
+    if (stand) $('kursStand').textContent = 'Stand ' + stand + ', wird täglich aktualisiert.';
+  }
+  zeigeKurse();
+  render();
+  fetch('kurse.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (k) {
+    if (k.gold > 0) $('goldHeute').value = k.gold;
+    if (k.silber > 0) $('silberHeute').value = k.silber;
+    zeigeKurse(new Date(k.stand).toLocaleDateString('de-DE'));
+    render();
+  }).catch(function () { $('kursStand').textContent = 'Kurse vom 16.10.2026 (aktueller Stand gerade nicht abrufbar).'; });
+})();
+</script>
+</body>
+</html>
