@@ -209,6 +209,9 @@ details[open] summary { margin-bottom: 16px; }
 .contact { display: grid; grid-template-columns: auto 1fr; gap: 4px 20px; font-size: 14px; margin: 12px 0 0; }
 .contact dt { font-size: 12px; letter-spacing: .08em; color: var(--muted); text-transform: uppercase; padding-top: 2px; }
 .contact dd { margin: 0; }
+.contact a { color: inherit; text-decoration: underline; text-decoration-color: var(--gold); text-underline-offset: 3px; }
+.contact a:hover { color: var(--gold-text); }
+.logo-link { display: block; }
 .disclaimer { font-size: 12px; color: var(--muted); margin-top: 24px; }
 /* Ergebnisleiste unten, nur schmale Bildschirme */
 .dock { display: none; }
@@ -255,8 +258,10 @@ details[open] summary { margin-bottom: 16px; }
 <div class="wrap">
 
   <header class="top">
-    <img class="logo logo-dunkel" src="assets/logodunkel.png" alt="Thomas Fiebig · Edelmetallfachberater">
-    <img class="logo logo-hell" src="assets/logohell.png" alt="Thomas Fiebig · Edelmetallfachberater">
+    <a href="https://fiebig-edelmetallfachberater.com" class="logo-link" aria-label="Zur Webseite von Thomas Fiebig">
+      <img class="logo logo-dunkel" src="assets/logodunkel.png" alt="Thomas Fiebig · Edelmetallfachberater">
+      <img class="logo logo-hell" src="assets/logohell.png" alt="Thomas Fiebig · Edelmetallfachberater">
+    </a>
     <div class="actions no-print">
       <button type="button" id="themeBtn" aria-label="Hell/Dunkel umschalten">Hell / Dunkel</button>
       <button type="button" class="primary" id="printBtn">Drucken / PDF</button>
@@ -430,9 +435,10 @@ details[open] summary { margin-bottom: 16px; }
         <p class="eyebrow">Ihr Ansprechpartner</p>
         <h2>Thomas Fiebig <span style="font-weight:400;color:var(--muted)">· Zertifizierter Edelmetallfachberater</span></h2>
         <dl class="contact">
-          <dt>Mobil</dt><dd>0160 / 96 43 22 46</dd>
-          <dt>E-Mail</dt><dd>beratung@fiebig-edelmetallfachberater.com</dd>
-          <dt>Web</dt><dd>fiebig-edelmetallfachberater.com</dd>
+          <dt>Mobil</dt><dd><a href="tel:+4916096432246">0160 / 96 43 22 46</a></dd>
+          <dt>WhatsApp</dt><dd><a id="waLink" href="https://wa.me/4916096432246" target="_blank" rel="noopener">Nachricht schreiben</a></dd>
+          <dt>E-Mail</dt><dd><a id="mailLink" href="mailto:beratung@fiebig-edelmetallfachberater.com">beratung@fiebig-edelmetallfachberater.com</a></dd>
+          <dt>Web</dt><dd><a href="https://fiebig-edelmetallfachberater.com" target="_blank" rel="noopener">fiebig-edelmetallfachberater.com</a></dd>
         </dl>
         <p class="disclaimer">Rückrechnung mit historischen Werten und den genannten Annahmen. Keine Finanz-, Anlage- oder Steuerberatung. Wertentwicklungen der Vergangenheit sind kein verlässlicher Indikator für die Zukunft. Alle Angaben ohne Gewähr.</p>
       </section>
@@ -682,6 +688,11 @@ details[open] summary { margin-bottom: 16px; }
     $('stand').textContent = HEUTE.toLocaleDateString('de-DE');
     $('kundeZeile').textContent = 'Anfang ' + e.start + ' (vor ' + vor + ' Jahren) · ' + anlage + ' · ' + gewichtung;
     $('verlaufStart').textContent = e.start;
+    var nachricht = 'Guten Tag Herr Fiebig,\n\nich habe Ihren Gold- und Silber-Rückrechner ausprobiert und würde gern einen Beratungstermin vereinbaren.\n\n' +
+      'Meine Rechnung: ab Anfang ' + e.start + ', ' + anlage + ', ' + gewichtung + ', Wert heute ' + eur0.format(r.wert) + '.\n\nViele Grüße';
+    $('mailLink').href = 'mailto:beratung@fiebig-edelmetallfachberater.com?subject=' +
+      encodeURIComponent('Beratungstermin – Gold- und Silber-Rückrechner') + '&body=' + encodeURIComponent(nachricht);
+    $('waLink').href = 'https://wa.me/4916096432246?text=' + encodeURIComponent(nachricht);
 
     $('kpiEin').textContent = eur0.format(r.ein);
     $('kpiEinSub').textContent = 'seit Anfang ' + e.start;
