@@ -1,0 +1,21 @@
+name: Kurse aktualisieren
+on:
+  schedule:
+    - cron: '30 5 * * *'
+    - cron: '30 17 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  kurse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 kurse_holen.py
+        env:
+          GOLDPRICE_KEY: ${{ secrets.GOLDPRICE_KEY }}
+      - run: |
+          git config user.name "kurse-bot"
+          git config user.email "kurse-bot@users.noreply.github.com"
+          git add kurse.json
+          git diff --cached --quiet || (git commit -m "Kurse aktualisiert" && git push)
