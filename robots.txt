@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rechner.fiebig-edelmetallfachberater.com/sitemap.xml

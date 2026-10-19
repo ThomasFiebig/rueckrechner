@@ -3,8 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Gold- und Silber-Rückrechner</title>
-<meta name="description" content="Was wäre Gold und Silber heute wert? Rückrechnung ab 1979 mit Einmalkauf oder Sparplan, im Vergleich zum Konto nach Inflation.">
+<title>Goldrechner: Was wäre mein Gold und Silber heute wert?</title>
+<meta name="description" content="Was wäre, wenn ich damals Gold oder Silber gekauft hätte? Kostenloser Rechner mit historischen Kursen seit 1979: Einmalkauf oder Sparplan, Wert heute, Rendite pro Jahr und Vergleich mit Konto und Inflation.">
+<link rel="canonical" href="https://rechner.fiebig-edelmetallfachberater.com/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="de_DE">
+<meta property="og:url" content="https://rechner.fiebig-edelmetallfachberater.com/">
+<meta property="og:title" content="Goldrechner: Was wäre mein Gold und Silber heute wert?">
+<meta property="og:description" content="Was wäre, wenn ich damals Gold oder Silber gekauft hätte? Kostenloser Rechner mit historischen Kursen seit 1979: Einmalkauf oder Sparplan, Wert heute, Rendite pro Jahr und Vergleich mit Konto und Inflation.">
+<meta property="og:image" content="https://rechner.fiebig-edelmetallfachberater.com/assets/og-bild.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Goldrechner", "alternateName": "Gold- und Silberrechner: Was wäre mein Gold heute wert?", "url": "https://rechner.fiebig-edelmetallfachberater.com/", "description": "Was wäre, wenn ich damals Gold oder Silber gekauft hätte? Kostenloser Rechner mit historischen Kursen seit 1979: Einmalkauf oder Sparplan, Wert heute, Rendite pro Jahr und Vergleich mit Konto und Inflation.", "inLanguage": "de-DE", "applicationCategory": "FinanceApplication", "operatingSystem": "Alle (läuft im Browser)", "isAccessibleForFree": true, "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "author": {"@type": "Person", "name": "Thomas Fiebig", "jobTitle": "Edelmetallfachberater", "url": "https://fiebig-edelmetallfachberater.com"}}</script>
 <style>
 /* Schrift liegt beim Rechner, damit keine Daten an Google gehen */
 @font-face { font-family: "Work Sans"; src: url("assets/WorkSans.ttf") format("truetype"); font-weight: 100 900; font-style: normal; font-display: swap; }
@@ -132,6 +143,10 @@ h2 { font-weight: 500; font-size: 18px; margin: 0 0 16px; }
 .eyebrow { font-size: 12px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-text); margin: 0 0 6px; }
 section.block { padding: 28px 0; border-top: 1px solid var(--line); }
 .lead { color: var(--muted); margin: -8px 0 16px; }
+.intro { color: var(--muted); margin: -4px 0 8px; }
+.faq details { border-bottom: 1px solid var(--line); padding: 12px 0; }
+.faq details summary { font-size: 16px; }
+.faq details p { margin: 0; color: var(--muted); }
 
 .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 8px; }
 @media (max-width: 600px) { .kpis { grid-template-columns: 1fr; } }
@@ -213,6 +228,7 @@ details[open] summary { margin-bottom: 16px; }
 .contact a:hover { color: var(--gold-text); }
 .logo-link { display: block; }
 .disclaimer { font-size: 12px; color: var(--muted); margin-top: 24px; }
+.disclaimer a { color: inherit; text-decoration-color: var(--gold); text-underline-offset: 3px; }
 /* Ergebnisleiste unten, nur schmale Bildschirme */
 .dock { display: none; }
 @media (max-width: 900px) {
@@ -341,17 +357,21 @@ details[open] summary { margin-bottom: 16px; }
       <fieldset>
         <legend>Vergleich Konto</legend>
         <div class="field">
-          <label for="zins">Zins auf dem Konto p. a. (%)</label>
-          <input type="number" inputmode="decimal" id="zins" value="0" min="0" max="15" step="0.1">
+          <label for="kontoArt">Konto</label>
+          <select id="kontoArt">
+            <option value="spar" selected>Sparbuch: echter Zins des jeweiligen Jahres</option>
+            <option value="giro">Girokonto: ohne Zinsen</option>
+          </select>
         </div>
-        <p class="hint">Dasselbe Geld zu denselben Zeitpunkten aufs Konto gelegt. 0 % = Girokonto, für Sparbuch oder Tagesgeld einen Durchschnittszins eintragen.</p>
+        <p class="hint">Dasselbe Geld zu denselben Zeitpunkten aufs Konto gelegt. Sparbuch mit dem durchschnittlichen Zins laut Deutscher Bundesbank, Jahr für Jahr.</p>
       </fieldset>
     </form>
 
     <!-- Ergebnis -->
     <main id="ergebnis">
-      <p class="eyebrow">Rückrechnung Gold &amp; Silber · <span id="stand"></span></p>
-      <h1>Was wäre es heute wert?</h1>
+      <p class="eyebrow">Goldrechner · Gold &amp; Silber · <span id="stand"></span></p>
+      <h1>Was wäre mein Gold und Silber heute wert?</h1>
+      <p class="intro">Rechnen Sie aus der Vergangenheit: Was wäre, wenn Sie damals gekauft hätten?</p>
       <p class="sub" id="kundeZeile"></p>
 
       <div class="kpis">
@@ -411,7 +431,7 @@ details[open] summary { margin-bottom: 16px; }
               <thead>
                 <tr>
                   <th>Jahr</th><th>Gold<br>€/oz</th><th>Silber<br>€/oz</th><th>Eingezahlt</th>
-                  <th>Wert<br>Gold</th><th>Wert<br>Silber</th><th>Gesamt</th><th>Gewinn /<br>Verlust</th><th>Konto</th><th>Inflation</th>
+                  <th>Wert<br>Gold</th><th>Wert<br>Silber</th><th>Gesamt</th><th>Gewinn /<br>Verlust</th><th>Konto</th><th>Zins</th><th>Inflation</th>
                 </tr>
               </thead>
               <tbody id="jahre"></tbody>
@@ -425,6 +445,35 @@ details[open] summary { margin-bottom: 16px; }
         <details id="annahmenBox">
           <summary>Annahmen dieser Rechnung</summary>
           <ul class="notes" id="annahmen"></ul>
+        </details>
+      </section>
+
+      <section class="block faq no-print">
+        <p class="eyebrow">05</p>
+        <h2>Häufige Fragen zum Goldrechner</h2>
+        <details>
+          <summary>Wie funktioniert der Goldrechner?</summary>
+          <p>Sie wählen ein Startjahr ab 1979, einen Betrag als Einmalkauf, als monatlichen Sparplan oder beides, und die Aufteilung zwischen Gold und Silber. Der Rechner kauft rückwirkend zu den historischen Kursen in Euro und bewertet den Bestand mit den heutigen Kursen. Die heutigen Kurse werden zweimal täglich aktualisiert.</p>
+        </details>
+        <details>
+          <summary>Was wäre mein Gold heute wert, wenn ich damals gekauft hätte?</summary>
+          <p>Das zeigt der Rechner oben: wie viel Sie eingezahlt hätten, was Gold und Silber heute wert wären, den Wertzuwachs in Euro und die Rendite pro Jahr. Dazu sehen Sie Ihren Bestand in Gramm, Kilogramm und Unzen und den Verlauf Jahr für Jahr.</p>
+        </details>
+        <details>
+          <summary>Gold oder Konto: Was hätte sich mehr gelohnt?</summary>
+          <p>Der Rechner legt dasselbe Geld zu denselben Zeitpunkten auch aufs Sparbuch, mit dem tatsächlichen durchschnittlichen Sparzins des jeweiligen Jahres laut Deutscher Bundesbank. Außerdem zeigt er, wie viel Geld Sie heute bräuchten, um dieselbe Kaufkraft zu haben wie damals. Grundlage ist der Verbraucherpreisindex des Statistischen Bundesamts.</p>
+        </details>
+        <details>
+          <summary>Woher stammen die Gold- und Silberkurse?</summary>
+          <p>Gold: Jahresschlusskurse in Euro je Feinunze (gold.de), vor 1999 auf Basis des ECU. Silber: über das Gold-Silber-Verhältnis der Jahresschlusskurse in Dollar in Euro umgerechnet. Innerhalb eines Jahres verteilt der Rechner die Kaufkurse gleichmäßig zwischen den Jahresschlusskursen.</p>
+        </details>
+        <details>
+          <summary>Sind Kosten und Steuern berücksichtigt?</summary>
+          <p>Nein. Gerechnet wird zum Börsenkurs, ohne Händlerspanne, Mehrwertsteuer, Lagerkosten und Steuern. Die Konditionen bespreche ich mit Ihnen persönlich in der Beratung.</p>
+        </details>
+        <details>
+          <summary>Ist das eine Prognose?</summary>
+          <p>Nein. Der Rechner zeigt, was in der Vergangenheit passiert wäre. Wertentwicklungen der Vergangenheit sind kein verlässlicher Indikator für die Zukunft, und die Kurse von Gold und Silber schwanken, auch durch den Wechselkurs zwischen Dollar und Euro.</p>
         </details>
       </section>
 
@@ -495,6 +544,20 @@ details[open] summary { margin-bottom: 16px; }
     2015: 0.5, 2016: 0.5, 2017: 1.5, 2018: 1.8, 2019: 1.4, 2020: 0.5, 2021: 3.1, 2022: 6.9, 2023: 5.9,
     2024: 2.2, 2025: 2.2
   };
+  // Sparzins Deutschland in % p. a., Jahresdurchschnitt der Monatswerte (Deutsche Bundesbank):
+  // bis 2002 Spareinlagen mit dreimonatiger Kündigungsfrist und Mindest-/Grundverzinsung (SU0022),
+  // ab 2003 MFI-Zinsstatistik, Einlagen privater Haushalte mit Kündigungsfrist bis 3 Monate (SUD105)
+  var ZINS = {
+    1979: 3.15, 1980: 4.64, 1981: 4.92, 1982: 4.85, 1983: 3.26, 1984: 3.01, 1985: 2.88, 1986: 2.5, 1987: 2.11,
+    1988: 2.01, 1989: 2.43, 1990: 2.81, 1991: 2.82, 1992: 2.81, 1993: 2.54, 1994: 2.1, 1995: 2.04, 1996: 1.99,
+    1997: 1.71, 1998: 1.56, 1999: 1.31, 2000: 1.25, 2001: 1.19, 2002: 1.02, 2003: 2.2, 2004: 2.13, 2005: 2.04,
+    2006: 2.06, 2007: 2.35, 2008: 2.52, 2009: 1.82, 2010: 1.41, 2011: 1.52, 2012: 1.32, 2013: 0.99, 2014: 0.76,
+    2015: 0.46, 2016: 0.3, 2017: 0.2, 2018: 0.16, 2019: 0.13, 2020: 0.11, 2021: 0.09, 2022: 0.09, 2023: 0.46,
+    2024: 0.74, 2025: 0.68, 2026: 0.7
+  };
+  var ZINS_STAND = 'August 2026';
+  var ZINS_LETZT = ZINS[2026];
+  var sparzins = function (jahr) { return ZINS[jahr] != null ? ZINS[jahr] : ZINS_LETZT; };
   // Für das laufende Jahr gibt es noch keine Jahresrate, daher Annahme
   var INFL_LAUFEND = 2.0;
   var inflation = function (jahr) { return INFL[jahr] != null ? INFL[jahr] : INFL_LAUFEND; };
@@ -545,13 +608,13 @@ details[open] summary { margin-bottom: 16px; }
       }
       if (e.rate > 0) kauf(e.rate, pG, pS);
       if (t === 0) punkte.push({ t: 0, label: 'Anfang ' + e.start, ein: ein, g: ozG * pG, s: ozS * pS, pG: pG, pS: pS, konto: konto, kk: kk });
-      konto *= 1 + e.zins / 100 / 12;
+      konto *= 1 + (e.kontoArt === 'spar' ? sparzins(jahr) : 0) / 100 / 12;
       kk *= Math.pow(1 + inflation(jahr) / 100, 1 / 12);
       t++;
     }
     for (var y = e.start; y <= LETZTES; y++) {
       for (var m = 0; m < 12; m++) monat(y, m);
-      punkte.push({ t: t, jahr: y, label: String(y), ein: ein, g: ozG * GOLD[y], s: ozS * SILBER[y], pG: GOLD[y], pS: SILBER[y], konto: konto, kk: kk, infl: INFL[y] });
+      punkte.push({ t: t, jahr: y, label: String(y), ein: ein, g: ozG * GOLD[y], s: ozS * SILBER[y], pG: GOLD[y], pS: SILBER[y], konto: konto, kk: kk, infl: INFL[y], zins: e.kontoArt === 'spar' ? ZINS[y] : 0 });
     }
     var j0 = Math.max(0, (e.start - LETZTES - 1) * 12);
     for (var j = j0; j < K; j++) monat(LETZTES + 1 + Math.floor(j / 12), j % 12);
@@ -659,7 +722,7 @@ details[open] summary { margin-bottom: 16px; }
       einmal: mitEinmal ? Math.max(0, val('einmal')) : 0, zukaeufe: zk,
       rate: mitSpar ? Math.max(0, val('rate')) : 0,
       goldHeute: Math.max(1, val('goldHeute')), silberHeute: Math.max(0.1, val('silberHeute')),
-      zins: Math.max(0, val('zins'))
+      kontoArt: $('kontoArt').value
     };
   }
 
@@ -686,10 +749,10 @@ details[open] summary { margin-bottom: 16px; }
     $('stand').textContent = HEUTE.toLocaleDateString('de-DE');
     $('kundeZeile').textContent = 'Anfang ' + e.start + ' (vor ' + vor + ' Jahren) · ' + anlage + ' · ' + gewichtung;
     $('verlaufStart').textContent = e.start;
-    var nachricht = 'Guten Tag Herr Fiebig,\n\nich habe Ihren Gold- und Silber-Rückrechner ausprobiert und würde gern einen Beratungstermin vereinbaren.\n\n' +
+    var nachricht = 'Guten Tag Herr Fiebig,\n\nich habe Ihren Goldrechner ausprobiert und würde gern einen Beratungstermin vereinbaren.\n\n' +
       'Meine Rechnung: ab Anfang ' + e.start + ', ' + anlage + ', ' + gewichtung + ', Wert heute ' + eur0.format(r.wert) + '.\n\nViele Grüße';
     $('mailLink').href = 'mailto:beratung@fiebig-edelmetallfachberater.com?subject=' +
-      encodeURIComponent('Beratungstermin – Gold- und Silber-Rückrechner') + '&body=' + encodeURIComponent(nachricht);
+      encodeURIComponent('Beratungstermin – Goldrechner') + '&body=' + encodeURIComponent(nachricht);
     $('waLink').href = 'https://wa.me/4916096432246?text=' + encodeURIComponent(nachricht);
 
     $('kpiEin').textContent = eur0.format(r.ein);
@@ -715,7 +778,9 @@ details[open] summary { margin-bottom: 16px; }
       zeile('Gesamtwert heute', eur0.format(r.wert) + ' &nbsp;(' + vz(plus) + ')', { sum: true, note: 'eingezahlt ' + eur0.format(r.ein) });
 
     // Vergleich Konto und Kaufkraft
-    var kontoTxt = e.zins > 0 ? 'mit ' + num2.format(e.zins) + ' % Zins' : 'ohne Zinsen';
+    var zinsSchnitt = 0;
+    for (var zj = e.start; zj <= HEUTE_JAHR; zj++) zinsSchnitt += sparzins(zj) / (HEUTE_JAHR - e.start + 1);
+    var kontoTxt = e.kontoArt === 'spar' ? 'als Sparbuch mit dem Zins des jeweiligen Jahres (im Schnitt ' + num2.format(zinsSchnitt) + ' % p. a.)' : 'als Girokonto ohne Zinsen';
     var verlust = r.kk - r.konto;
     $('kontoLead').textContent = 'Dasselbe Geld zu denselben Zeitpunkten auf dem Konto, ' + kontoTxt + ':';
     $('konto').innerHTML =
@@ -740,7 +805,7 @@ details[open] summary { margin-bottom: 16px; }
       return '<tr><td>' + (p.heute ? 'heute' : p.label) + '</td><td>' + eur2.format(p.pG) + '</td><td>' + eur2.format(p.pS) +
         '</td><td>' + eur0.format(p.ein) + '</td><td>' + eur0.format(p.g) + '</td><td>' + eur0.format(p.s) +
         '</td><td>' + eur0.format(sum) + '</td><td class="' + (d < 0 ? 'neg' : '') + '">' + vz(d) + '</td><td>' + eur0.format(p.konto) +
-        '</td><td>' + (p.infl != null ? pct1(p.infl) : '') + '</td></tr>';
+        '</td><td>' + (p.zins != null ? num2.format(p.zins) + ' %' : '') + '</td><td>' + (p.infl != null ? pct1(p.infl) : '') + '</td></tr>';
     }).join('');
 
     var a = [];
@@ -751,7 +816,7 @@ details[open] summary { margin-bottom: 16px; }
     a.push('Kaufkurse innerhalb eines Jahres gleichmäßig zwischen den Jahresschlusskursen verteilt; tatsächliche Monatskurse weichen davon ab. Für ' + (LETZTES + 1) + ' verläuft die Kurve vom Schlusskurs ' + LETZTES + ' bis zum heutigen Kurs.');
     a.push('Heutige Kurse: Gold ' + eur2.format(e.goldHeute) + ', Silber ' + eur2.format(e.silberHeute) + ' je Unze.');
     a.push('Kauf zum Börsenkurs, ohne Händlerspanne, Mehrwertsteuer und Lagerkosten.');
-    a.push('Konto: dieselben Einzahlungen ' + kontoTxt + (e.zins > 0 ? ', monatlich verzinst, ohne Steuern auf die Zinsen.' : '.') +
+    a.push('Konto: dieselben Einzahlungen ' + kontoTxt + (e.kontoArt === 'spar' ? ', monatlich verzinst, ohne Steuern auf die Zinsen. Zinssätze: Deutsche Bundesbank, Jahresdurchschnitt; bis 2002 Spareinlagen mit dreimonatiger Kündigungsfrist, ab 2003 Einlagen mit Kündigungsfrist bis 3 Monate (einschließlich Prämiensparen, daher eher höher als ein einfaches Sparbuch); für die Monate nach ' + ZINS_STAND + ' gilt der letzte bekannte Jahresschnitt.' : '.') +
       ' Kaufkraft über den Verbraucherpreisindex für Deutschland (Statistisches Bundesamt' + (e.start < 1992 ? ', bis 1991 früheres Bundesgebiet' : '') +
       '); für ' + HEUTE_JAHR + ' vorläufig ' + num1.format(INFL_LAUFEND) + ' % pro Jahr angenommen.');
     a.push('Bewertung zum Kurs, ohne Abschlag beim Verkauf. Rendite pro Jahr als interner Zinsfuß über alle Einzahlungen.');

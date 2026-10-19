@@ -1,4 +1,4 @@
-# Gold- und Silber-Rückrechner
+# Goldrechner – Was wäre mein Gold und Silber heute wert?
 
 Öffentliche Version unter https://rechner.fiebig-edelmetallfachberater.com
 
