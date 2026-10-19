@@ -1,0 +1,16 @@
+/* Gemeinsame Gestaltung für Impressum und Datenschutz, passend zum Rechner */
+@font-face { font-family: "Work Sans"; src: url("WorkSans.ttf") format("truetype"); font-weight: 100 900; font-style: normal; font-display: swap; }
+:root { --bg: #F4F2EC; --ink: #191816; --muted: #6B665E; --line: #DDD8CC; --gold-text: #8A6A2B; }
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #191816; --ink: #F4F2EC; --muted: #9C9489; --line: #38342E; --gold-text: #C29D54; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: "Work Sans", "Helvetica Neue", Arial, sans-serif; font-size: 16px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 32px; font-weight: 500; margin: 8px 0 24px; }
+h2 { font-size: 13px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-text); margin: 32px 0 8px; }
+p { margin: 0 0 12px; overflow-wrap: anywhere; }
+a { color: inherit; text-decoration-color: var(--gold-text); text-underline-offset: 3px; }
+.zurueck { font-size: 14px; }
+.stand { font-size: 13px; color: var(--muted); margin-top: 32px; }
+.fuss { border-top: 1px solid var(--line); padding-top: 16px; margin-top: 32px; font-size: 14px; }

@@ -5,10 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Gold- und Silber-Rückrechner</title>
 <meta name="description" content="Was wäre Gold und Silber heute wert? Rückrechnung ab 1979 mit Einmalkauf oder Sparplan, im Vergleich zum Konto nach Inflation.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+/* Schrift liegt beim Rechner, damit keine Daten an Google gehen */
+@font-face { font-family: "Work Sans"; src: url("assets/WorkSans.ttf") format("truetype"); font-weight: 100 900; font-style: normal; font-display: swap; }
 :root {
   --bg: #F4F2EC;
   --surface: #FFFFFF;
@@ -106,6 +105,7 @@ legend {
 }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .hint { font-size: 12px; color: var(--muted); margin: 4px 0 0; }
+.kostenhinweis { margin: 12px 0 0; }
 
 /* Umschalter Einmalkauf / Sparplan / Beides */
 .seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: 2px; overflow: hidden; }
@@ -371,6 +371,7 @@ details[open] summary { margin-bottom: 16px; }
           <div class="subline" id="kpiPlusSub"></div>
         </div>
       </div>
+      <p class="hint kostenhinweis">Bewertung zum Börsenkurs, ohne Händlerspanne, Mehrwertsteuer und Lagerkosten. Die Konditionen bespreche ich mit Ihnen persönlich in der Beratung.</p>
 
       <section class="block">
         <p class="eyebrow">01</p>
@@ -437,6 +438,7 @@ details[open] summary { margin-bottom: 16px; }
           <dt>Web</dt><dd><a href="https://fiebig-edelmetallfachberater.com" target="_blank" rel="noopener">fiebig-edelmetallfachberater.com</a></dd>
         </dl>
         <p class="disclaimer">Rückrechnung mit historischen Werten und den genannten Annahmen. Keine Finanz-, Anlage- oder Steuerberatung. Wertentwicklungen der Vergangenheit sind kein verlässlicher Indikator für die Zukunft. Alle Angaben ohne Gewähr.</p>
+        <p class="disclaimer"><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></p>
       </section>
     </main>
   </div>
