@@ -320,17 +320,11 @@ details[open] summary { margin-bottom: 16px; }
 
       <fieldset id="fsSpar" hidden>
         <legend>Sparplan</legend>
-        <div class="row2">
-          <div class="field">
-            <label for="rate">Monatsrate (€)</label>
-            <input type="number" inputmode="decimal" id="rate" value="100" min="0" step="25">
-          </div>
-          <div class="field">
-            <label for="dyn">Erhöhung p. a. (%)</label>
-            <input type="number" inputmode="decimal" id="dyn" value="0" min="0" max="20" step="1">
-          </div>
+        <div class="field">
+          <label for="rate">Monatsrate (€)</label>
+          <input type="number" inputmode="decimal" id="rate" value="100" min="0" step="25">
         </div>
-        <p class="hint">Kauf jeweils zum Monatsanfang, bis heute. Die Erhöhung greift jedes Jahr im Januar.</p>
+        <p class="hint">Kauf jeweils zum Monatsanfang, bis heute.</p>
       </fieldset>
 
       <fieldset>
@@ -427,8 +421,10 @@ details[open] summary { margin-bottom: 16px; }
 
       <section class="block">
         <p class="eyebrow">04</p>
-        <h2>Annahmen dieser Rechnung</h2>
-        <ul class="notes" id="annahmen"></ul>
+        <details id="annahmenBox">
+          <summary>Annahmen dieser Rechnung</summary>
+          <ul class="notes" id="annahmen"></ul>
+        </details>
       </section>
 
       <section class="block">
@@ -545,7 +541,7 @@ details[open] summary { margin-bottom: 16px; }
         if (jahr === e.start) kauf(e.einmal, pG, pS);
         e.zukaeufe.forEach(function (z) { if (z.jahr === jahr) kauf(z.betrag, pG, pS); });
       }
-      if (e.rate > 0) kauf(e.rate * Math.pow(1 + e.dyn / 100, jahr - e.start), pG, pS);
+      if (e.rate > 0) kauf(e.rate, pG, pS);
       if (t === 0) punkte.push({ t: 0, label: 'Anfang ' + e.start, ein: ein, g: ozG * pG, s: ozS * pS, pG: pG, pS: pS, konto: konto, kk: kk });
       konto *= 1 + e.zins / 100 / 12;
       kk *= Math.pow(1 + inflation(jahr) / 100, 1 / 12);
@@ -659,7 +655,7 @@ details[open] summary { margin-bottom: 16px; }
     return {
       start: start, w: val('wGold') / 100, modus: mo,
       einmal: mitEinmal ? Math.max(0, val('einmal')) : 0, zukaeufe: zk,
-      rate: mitSpar ? Math.max(0, val('rate')) : 0, dyn: mitSpar ? Math.max(0, val('dyn')) : 0,
+      rate: mitSpar ? Math.max(0, val('rate')) : 0,
       goldHeute: Math.max(1, val('goldHeute')), silberHeute: Math.max(0.1, val('silberHeute')),
       zins: Math.max(0, val('zins'))
     };
@@ -682,7 +678,7 @@ details[open] summary { margin-bottom: 16px; }
     var teile = [];
     if (e.einmal > 0) teile.push(eur0.format(e.einmal) + ' einmalig');
     if (e.zukaeufe.length) teile.push(e.zukaeufe.length + (e.zukaeufe.length === 1 ? ' Zukauf' : ' Zukäufe'));
-    if (e.rate > 0) teile.push(eur0.format(e.rate) + '/Monat' + (e.dyn > 0 ? ' (+' + num1.format(e.dyn) + ' % p. a.)' : ''));
+    if (e.rate > 0) teile.push(eur0.format(e.rate) + '/Monat');
     var anlage = teile.join(', ') || 'kein Betrag';
     var gewichtung = wg + ' % Gold / ' + (100 - wg) + ' % Silber';
     $('stand').textContent = HEUTE.toLocaleDateString('de-DE');
@@ -748,7 +744,7 @@ details[open] summary { margin-bottom: 16px; }
     var a = [];
     a.push('Zeitraum von Anfang ' + e.start + ' bis heute (' + HEUTE.toLocaleDateString('de-DE') + '). Jeder Kauf wird zu ' + gewichtung + ' aufgeteilt, ohne spätere Umschichtung.');
     if (e.einmal > 0 || e.zukaeufe.length) a.push('Einmalkauf und Zukäufe jeweils zum Jahresanfang.');
-    if (e.rate > 0) a.push('Sparplan: Kauf zum Monatsanfang' + (e.dyn > 0 ? ', Rate steigt jedes Jahr um ' + num1.format(e.dyn) + ' %.' : '.'));
+    if (e.rate > 0) a.push('Sparplan: Kauf zum Monatsanfang.');
     a.push('Gold: Jahresschlusskurse in Euro je Feinunze (gold.de). Silber in Euro über das Gold-Silber-Verhältnis der Jahresschlusskurse in Dollar abgeleitet, damit beide Metalle dieselbe Euro-Umrechnung haben; Abweichungen zu anderen Quellen sind möglich.');
     a.push('Kaufkurse innerhalb eines Jahres gleichmäßig zwischen den Jahresschlusskursen verteilt; tatsächliche Monatskurse weichen davon ab. Für ' + (LETZTES + 1) + ' verläuft die Kurve vom Schlusskurs ' + LETZTES + ' bis zum heutigen Kurs.');
     a.push('Heutige Kurse: Gold ' + eur2.format(e.goldHeute) + ', Silber ' + eur2.format(e.silberHeute) + ' je Unze.');
@@ -820,6 +816,10 @@ details[open] summary { margin-bottom: 16px; }
   $('chart').addEventListener('pointerdown', zeigeTip);
   $('chart').addEventListener('pointerleave', function (ev) { if (ev.pointerType === 'mouse') versteckeTip(); });
   $('printBtn').addEventListener('click', function () { window.print(); });
+  // Annahmen im Ausdruck immer zeigen, danach alten Zustand wiederherstellen
+  var annahmenWarOffen = false;
+  window.addEventListener('beforeprint', function () { annahmenWarOffen = $('annahmenBox').open; $('annahmenBox').open = true; });
+  window.addEventListener('afterprint', function () { $('annahmenBox').open = annahmenWarOffen; });
   $('themeBtn').addEventListener('click', function () {
     var root = document.documentElement;
     var dunkel = root.getAttribute('data-theme')
