@@ -443,7 +443,7 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
               <thead>
                 <tr>
                   <th>Jahr</th><th>Gold<br>€/oz</th><th>Silber<br>€/oz</th><th>Eingezahlt</th>
-                  <th>Wert<br>Gold</th><th>Wert<br>Silber</th><th>Gesamt</th><th>Gewinn /<br>Verlust</th><th>Konto</th><th>Zins</th><th>Inflation</th>
+                  <th>Wert<br>Gold</th><th>Wert<br>Silber</th><th>Gesamt</th><th>Gewinn /<br>Verlust</th><th>Inflation</th>
                 </tr>
               </thead>
               <tbody id="jahre"></tbody>
@@ -842,8 +842,8 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
       var sum = p.g + p.s, d = sum - p.ein;
       return '<tr><td>' + (p.heute ? 'heute' : p.label) + '</td><td>' + eur2.format(p.pG) + '</td><td>' + eur2.format(p.pS) +
         '</td><td>' + eur0.format(p.ein) + '</td><td>' + eur0.format(p.g) + '</td><td>' + eur0.format(p.s) +
-        '</td><td>' + eur0.format(sum) + '</td><td class="' + (d < 0 ? 'neg' : '') + '">' + vz(d) + '</td><td>' + eur0.format(p.konto) +
-        '</td><td>' + (p.zins != null ? num2.format(p.zins) + ' %' : '') + '</td><td>' + (p.infl != null ? pct1(p.infl) : '') + '</td></tr>';
+        '</td><td>' + eur0.format(sum) + '</td><td class="' + (d < 0 ? 'neg' : '') + '">' + vz(d) +
+        '</td><td>' + (p.infl != null ? pct1(p.infl) : '') + '</td></tr>';
     }).join('');
 
     var a = [];
