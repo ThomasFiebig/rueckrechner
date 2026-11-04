@@ -114,6 +114,10 @@ legend {
   width: 100%; font: inherit; color: var(--ink); background: var(--bg);
   border: 1px solid var(--line); border-radius: 2px; padding: 9px 10px;
 }
+.field input::placeholder, .zk-row input::placeholder { color: var(--muted); opacity: .75; }
+.field select.leer { color: var(--muted); }
+.field select.leer option { color: var(--ink); }
+.leerhinweis { margin: 28px 0 0; padding: 18px 20px; border: 1px dashed var(--line); color: var(--muted); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .hint { font-size: 12px; color: var(--muted); margin: 4px 0 0; }
 .kostenhinweis { margin: 12px 0 0; }
@@ -336,7 +340,7 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
         <legend>Einmalkauf</legend>
         <div class="field">
           <label for="einmal">Betrag zu Beginn (€)</label>
-          <input type="number" inputmode="decimal" id="einmal" value="10000" min="0" step="1000">
+          <input type="number" inputmode="decimal" id="einmal" value="" placeholder="Betrag eingeben" min="0" step="1000">
         </div>
         <span class="lbl">Zukäufe (jeweils zum Jahresanfang)</span>
         <div id="zukaeufe"></div>
@@ -347,7 +351,7 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
         <legend>Sparplan</legend>
         <div class="field">
           <label for="rate">Monatsrate (€)</label>
-          <input type="number" inputmode="decimal" id="rate" value="100" min="0" step="25">
+          <input type="number" inputmode="decimal" id="rate" value="" placeholder="Betrag eingeben" min="0" step="25">
         </div>
         <p class="hint">Kauf jeweils zum Monatsanfang, bis heute.</p>
       </fieldset>
@@ -403,14 +407,16 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
       </div>
       <p class="hint kostenhinweis">Bewertung zum Börsenkurs, ohne Händlerspanne, Mehrwertsteuer und Lagerkosten. Die Konditionen bespreche ich mit Ihnen persönlich in der Beratung.</p>
 
-      <section class="block">
+      <p class="leerhinweis" id="leerHinweis" hidden>Wählen Sie das Jahr, ab dem Sie investiert hätten, und geben Sie einen Betrag ein. Dann sehen Sie hier, was daraus geworden wäre.</p>
+
+      <section data-detail class="block">
         <p class="eyebrow">01</p>
         <h2>Ihr Bestand heute</h2>
         <p class="lead" id="bestandLead"></p>
         <div class="rows" id="bestand"></div>
       </section>
 
-      <section class="block">
+      <section data-detail class="block">
         <p class="eyebrow">02</p>
         <h2>Und auf dem Konto?</h2>
         <p class="lead" id="kontoLead"></p>
@@ -418,7 +424,7 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
         <p class="callout" id="kontoFazit"></p>
       </section>
 
-      <section class="block">
+      <section data-detail class="block">
         <p class="eyebrow">03</p>
         <h2>Was Ihr Geld heute noch kauft</h2>
         <p class="lead">Wie viel Kaufkraft Sie im Vergleich zu Ihren Einzahlungen hätten, nach Inflation. Die gestrichelte Linie heißt: gleich viel wie eingezahlt. Darunter hat das Geld an Kaufkraft verloren. Jede Stufe der Skala ist eine Verdopplung, damit auch frühere Jahre gut sichtbar sind.</p>
@@ -435,7 +441,7 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
         <p class="callout" id="kaufkraftFazit" style="margin-top:16px"></p>
       </section>
 
-      <section class="block no-print">
+      <section data-detail class="block no-print">
         <details>
           <summary>Jahreswerte</summary>
           <div class="tablewrap">
@@ -452,7 +458,7 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
         </details>
       </section>
 
-      <section class="block">
+      <section data-detail class="block">
         <p class="eyebrow">04</p>
         <details id="annahmenBox">
           <summary>Annahmen dieser Rechnung</summary>
@@ -755,6 +761,31 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
     };
   }
 
+  // Startzustand: noch kein Jahr oder kein Betrag, alles auf null, Details ausgeblendet
+  function leer() {
+    var e = eingaben();
+    var vor = HEUTE_JAHR - e.start;
+    $('vorJahren').textContent = !isFinite(e.start) ? '' : vor > 0 ? 'Das ist vor ' + vor + (vor === 1 ? ' Jahr' : ' Jahren') + '.' : 'Seit Anfang dieses Jahres.';
+    if (isFinite(e.start)) syncZkJahre(e.start);
+    var wg = Math.round(e.w * 100);
+    $('wGoldTxt').textContent = 'Gold ' + wg + ' %';
+    $('wSilberTxt').textContent = 'Silber ' + (100 - wg) + ' %';
+    $('stand').textContent = HEUTE.toLocaleDateString('de-DE');
+    $('kundeZeile').textContent = '';
+    ['kpiEin', 'kpiWert', 'dockWert'].forEach(function (id) { $(id).textContent = eur0.format(0); });
+    $('kpiPlus').textContent = eur0.format(0);
+    $('kpiPlus').className = 'value';
+    ['kpiEinSub', 'kpiWertSub', 'kpiPlusSub', 'dockPlus'].forEach(function (id) { $(id).textContent = ''; });
+    $('dockEin').textContent = 'eingezahlt ' + eur0.format(0);
+    $('dockPlus').className = '';
+    var nachricht = 'Guten Tag Herr Fiebig,\n\nich habe Ihren Goldrechner ausprobiert und würde gern einen Beratungstermin vereinbaren.\n\nViele Grüße';
+    $('mailLink').href = 'mailto:beratung@fiebig-edelmetallfachberater.com?subject=' +
+      encodeURIComponent('Beratungstermin – Goldrechner') + '&body=' + encodeURIComponent(nachricht);
+    $('waLink').href = 'https://wa.me/4916096432246?text=' + encodeURIComponent(nachricht);
+    document.querySelectorAll('[data-detail]').forEach(function (el) { el.hidden = true; });
+    $('leerHinweis').hidden = false;
+  }
+
   function render() {
     var e = eingaben();
     $('fsEinmal').hidden = e.modus === 'spar';
@@ -762,6 +793,12 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
     var wg = Math.round(e.w * 100);
     $('wGoldTxt').textContent = 'Gold ' + wg + ' %';
     $('wSilberTxt').textContent = 'Silber ' + (100 - wg) + ' %';
+    var ohneJahr = !isFinite(e.start);
+    $('startJahr').classList.toggle('leer', ohneJahr);
+    var summe = e.einmal + e.rate + e.zukaeufe.reduce(function (x, z) { return x + z.betrag; }, 0);
+    if (ohneJahr || summe <= 0) { leer(); return; }
+    document.querySelectorAll('[data-detail]').forEach(function (el) { el.hidden = false; });
+    $('leerHinweis').hidden = true;
     var vor = HEUTE_JAHR - e.start;
     $('vorJahren').textContent = vor > 0 ? 'Das ist vor ' + vor + (vor === 1 ? ' Jahr' : ' Jahren') + '.' : 'Seit Anfang dieses Jahres.';
     syncZkJahre(e.start);
@@ -870,8 +907,8 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   function zkZeile(jahr, betrag) {
     var row = document.createElement('div');
     row.className = 'zk-row';
-    row.innerHTML = '<select aria-label="Jahr des Zukaufs">' + jahrOptionen(parseInt($('startJahr').value, 10), jahr) + '</select>' +
-      '<input type="number" inputmode="decimal" min="0" step="500" value="' + betrag + '" aria-label="Betrag des Zukaufs in Euro">' +
+    row.innerHTML = '<select aria-label="Jahr des Zukaufs">' + jahrOptionen(parseInt($('startJahr').value, 10) || MIN_JAHR, jahr) + '</select>' +
+      '<input type="number" inputmode="decimal" min="0" step="500" value="' + betrag + '" placeholder="Betrag eingeben" aria-label="Betrag des Zukaufs in Euro">' +
       '<button type="button" aria-label="Zukauf entfernen">×</button>';
     row.querySelector('button').addEventListener('click', function () { row.remove(); render(); });
     $('zukaeufe').appendChild(row);
@@ -883,18 +920,18 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
     });
   }
   $('zkAdd').addEventListener('click', function () {
-    var start = parseInt($('startJahr').value, 10);
+    var start = parseInt($('startJahr').value, 10) || HEUTE_JAHR - 10;
     var rows = document.querySelectorAll('.zk-row select');
     var letztes = rows.length ? parseInt(rows[rows.length - 1].value, 10) : start;
-    zkZeile(Math.min(HEUTE_JAHR, letztes + 5), 5000);
+    zkZeile(Math.min(HEUTE_JAHR, letztes + 5), '');
     render();
   });
 
   // Jahresauswahl
   var optionen = '';
   for (var y = HEUTE_JAHR; y >= MIN_JAHR; y--) optionen += '<option value="' + y + '">' + y + ' (vor ' + (HEUTE_JAHR - y) + ' J.)</option>';
-  $('startJahr').innerHTML = optionen;
-  $('startJahr').value = HEUTE_JAHR - 20;
+  $('startJahr').innerHTML = '<option value="" disabled selected>hier Jahr auswählen</option>' + optionen;
+  $('startJahr').value = '';
 
   // Kurse und Aufschläge bleiben im Browser gespeichert
   var saveFelder = document.querySelectorAll('[data-save]');
