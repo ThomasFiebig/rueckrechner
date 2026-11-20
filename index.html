@@ -977,6 +977,17 @@ a.termin:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   }
   zeigeKurse();
   render();
+  fetch('jahreswerte.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (j) {
+    Object.keys(j.gold || {}).map(Number).sort().forEach(function (y) {
+      if (GOLD[y] != null || y >= HEUTE_JAHR || !(j.gold[y] > 0) || GOLD[y - 1] == null) return;
+      GOLD[y] = j.gold[y];
+      SILBER[y] = j.silber && j.silber[y] > 0 ? j.silber[y] : SILBER[y - 1] * GOLD[y] / GOLD[y - 1];
+    });
+    Object.keys(j.inflation || {}).forEach(function (y) { if (INFL[y] == null) INFL[y] = j.inflation[y]; });
+    while (GOLD[LETZTES + 1] != null) LETZTES++;
+    K = Math.max(0.01, (HEUTE - new Date(LETZTES + 1, 0, 1)) / (864e5 * 30.436875));
+    render();
+  }).catch(function () {});
   fetch('kurse.json', { cache: 'no-cache' }).then(function (r) { return r.json(); }).then(function (k) {
     if (k.gold > 0) $('goldHeute').value = k.gold;
     if (k.silber > 0) $('silberHeute').value = k.silber;

@@ -32,7 +32,9 @@ try:
         jw = json.load(open('jahreswerte.json'))
     except Exception:
         jw = {}
-    jw.setdefault('gold', {})[str(datetime.date.fromisoformat(stand[:10]).year if stand else datetime.date.today().year)] = round(gold, 2)
+    jahr = str(datetime.date.fromisoformat(stand[:10]).year if stand else datetime.date.today().year)
+    jw.setdefault('gold', {})[jahr] = round(gold, 2)
+    jw.setdefault('silber', {})[jahr] = round(silber, 2)
     try:
         url = ('https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_aind'
                '?format=JSON&geo=DE&coicop=CP00&unit=RCH_A_AVG&sinceTimePeriod=2026')
@@ -45,7 +47,7 @@ try:
                 jw.setdefault('inflation', {})[jahr] = v
     except Exception as e:
         print('Inflation nicht abrufbar:', e)
-    jw['hinweis'] = 'Automatisch von kurse_holen.py gepflegt. gold = Euro je Unze, letzter Stand des Jahres; inflation = HVPI Deutschland in %.'
+    jw['hinweis'] = 'Automatisch von kurse_holen.py gepflegt. gold/silber = Euro je Unze, letzter Stand des Jahres; inflation = HVPI Deutschland in %.'
     json.dump(jw, open('jahreswerte.json', 'w'), indent=1, sort_keys=True)
     print('Jahreswerte', jw.get('gold'), jw.get('inflation'))
 except Exception as e:
