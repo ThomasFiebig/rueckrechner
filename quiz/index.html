@@ -52,8 +52,7 @@ body{background:var(--nacht);color:var(--fg);font-family:var(--sans);font-size:1
 
 .app{position:relative;z-index:1;max-width:460px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;padding-block:18px 28px;gap:16px}
 .kopf{display:flex;justify-content:space-between;align-items:center}
-.marke{font-family:var(--serif);font-size:17px;font-weight:500;letter-spacing:.01em}
-.marke span{font-family:var(--sans);font-size:10px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);display:block;margin-top:-2px}
+.logo{height:24px;width:auto;display:block}
 .balkenoben{width:96px;height:3px;border-radius:2px;background:rgba(255,255,255,.14);overflow:hidden}
 .balkenoben i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold3),var(--gold2));transition:width .6s cubic-bezier(.2,.7,.2,1)}
 .raum{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:14px;min-height:62vh}
@@ -154,7 +153,7 @@ h2{font-size:clamp(26px,7.2vw,32px)}
 <div class="hg" id="hg"></div>
 <div class="glow a"></div><div class="glow b"></div>
 <div class="app">
-  <div class="kopf"><div class="marke">Fiebig<span>Edelmetalle</span></div><div class="balkenoben"><i id="fort"></i></div></div>
+  <div class="kopf"><img class="logo" src="bilder/logo.png" alt="Fiebig Edelmetallfachberater" width="600" height="71"><div class="balkenoben"><i id="fort"></i></div></div>
   <div class="raum" id="raum"></div>
   <p class="entwurf"><a href="../impressum.html">Impressum</a> · <a href="../datenschutz.html">Datenschutz</a> · <a href="../">Zum ausführlichen Goldrechner</a></p>
 </div>
@@ -326,9 +325,9 @@ function ergebnis(){
     '</div>'+
     kaufkraftKarte(r)+
     '<div class="glaskarte" style="animation-delay:.5s"><h2>Und ab <em>heute</em>?</h2>'+
-    '<p class="text">Die Vergangenheit holt niemand nach. In einem kurzen Gespräch zeigt dir Thomas, wie du heute mit Gold und Silber eine Reserve aufbaust, auch mit kleinen Monatsbeträgen.</p>'+
+    '<p class="text">Die Vergangenheit holt niemand nach. In einem kurzen Gespräch zeige ich dir, wie du heute mit Gold und Silber eine Reserve aufbaust, auch mit kleinen Monatsbeträgen.</p>'+
     '<div class="person"><img alt="Thomas Fiebig" src="'+src('portrait')+'"><div><b>Thomas Fiebig</b><span>Edelmetallfachberater</span></div></div>'+
-    '<a class="cta" href="https://wa.me/4916096432246?text='+encodeURIComponent(text)+'" target="_blank" rel="noopener">Ergebnis an Thomas schicken</a>'+
+    '<a class="cta" href="https://wa.me/4916096432246?text='+encodeURIComponent(text)+'" target="_blank" rel="noopener">Schick mir dein Ergebnis</a>'+
     '<a class="leise" href="https://zeeg.me/fiebig-edelmetallfachberater" target="_blank" rel="noopener">Direkt Termin buchen</a>'+
     '<p class="ratgeber">Erst in Ruhe lesen? <a href="https://broschuere.fiebig-edelmetallfachberater.com" target="_blank" rel="noopener">Gratis-Ratgeber</a></p>'+
     '<hr class="trenn"><button class="nochmal" type="button" id="nochmal">Mit anderem Jahr nochmal spielen</button>'+
