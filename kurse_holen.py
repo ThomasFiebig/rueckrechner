@@ -22,3 +22,31 @@ assert 500 < gold < 20000 and 5 < silber < 500, (gold, silber)
 json.dump({'gold': round(gold, 2), 'silber': round(silber, 2), 'stand': stand, 'quelle': 'goldprice.dev'},
           open('kurse.json', 'w'), indent=1)
 print('Gold', round(gold, 2), 'Silber', round(silber, 2), 'Stand', stand)
+
+# Jahreswerte für das Gold-Quiz (quiz/index.html): Der Kurs des laufenden Jahres wird bei jedem Lauf überschrieben,
+# der letzte Lauf im Dezember bleibt als Jahresschlusskurs stehen. Dazu Inflation Deutschland ab 2026 von Eurostat
+# (HVPI, nur als Ersatz für Jahre, die in der Destatis-Tabelle im Quiz noch fehlen). Fehler hier stoppen nie die Kurse.
+try:
+    import datetime
+    try:
+        jw = json.load(open('jahreswerte.json'))
+    except Exception:
+        jw = {}
+    jw.setdefault('gold', {})[str(datetime.date.fromisoformat(stand[:10]).year if stand else datetime.date.today().year)] = round(gold, 2)
+    try:
+        url = ('https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/prc_hicp_aind'
+               '?format=JSON&geo=DE&coicop=CP00&unit=RCH_A_AVG&sinceTimePeriod=2026')
+        with urllib.request.urlopen(url, timeout=30) as r:
+            d = json.load(r)
+        werte = d.get('value', {})
+        for jahr, i in d['dimension']['time']['category']['index'].items():
+            v = werte.get(str(i))
+            if v is not None and -5 < v < 30:
+                jw.setdefault('inflation', {})[jahr] = v
+    except Exception as e:
+        print('Inflation nicht abrufbar:', e)
+    jw['hinweis'] = 'Automatisch von kurse_holen.py gepflegt. gold = Euro je Unze, letzter Stand des Jahres; inflation = HVPI Deutschland in %.'
+    json.dump(jw, open('jahreswerte.json', 'w'), indent=1, sort_keys=True)
+    print('Jahreswerte', jw.get('gold'), jw.get('inflation'))
+except Exception as e:
+    print('Jahreswerte nicht geschrieben:', e)

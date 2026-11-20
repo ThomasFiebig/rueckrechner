@@ -117,6 +117,21 @@ h2{font-size:clamp(26px,7.2vw,32px)}
 .b.g{background:linear-gradient(90deg,#A9843E,#F3DFA6);box-shadow:0 0 14px rgba(243,223,166,.6)}
 .b.s{background:rgba(246,240,226,.45)}
 .b.k{background:rgba(246,240,226,.25)}
+.kk-zeile{display:grid;gap:4px}
+.kk-kopf{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.kk-name{font-size:13px;color:var(--fg2)}
+.kk-chip{font-size:12px;font-weight:600;border-radius:999px;padding:3px 10px;white-space:nowrap}
+.kk-chip.minus{color:#F1B7A4;background:rgba(214,110,80,.16);border:1px solid rgba(214,110,80,.4)}
+.kk-chip.plus{color:var(--gold2);background:rgba(217,184,106,.14);border:1px solid rgba(217,184,106,.4)}
+.kk-wert{font-size:22px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.kk-spur{position:relative;height:12px;border-radius:6px;background:rgba(255,255,255,.07);overflow:hidden}
+.kk-b{position:absolute;inset:0 auto 0 0;width:0;border-radius:6px;transition:width 1.6s cubic-bezier(.2,.7,.2,1)}
+.kk-zeile.k .kk-b{background:rgba(246,240,226,.3)}
+.kk-zeile.s .kk-b{background:rgba(246,240,226,.5)}
+.kk-zeile.g .kk-b{background:linear-gradient(90deg,#A9843E,#F3DFA6);box-shadow:0 0 14px rgba(243,223,166,.6)}
+.kk-loch{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,rgba(214,110,80,.35) 0 4px,transparent 4px 8px)}
+.kk-marke{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--fg)}
+.text b{color:var(--fg);font-weight:600}
 .vergleich{display:flex;flex-direction:column;gap:14px}
 .kurve{width:100%;height:auto;display:block}
 .kurve text{font-family:var(--sans);font-size:10px;fill:rgba(246,240,226,.55)}
@@ -154,16 +169,31 @@ function src(k){return 'bilder/'+k.replace('_','-')+'.jpg';}
 var G={1978:164.14,1979:354.84,1980:448.00,1981:368.16,1982:470.98,1983:462.95,1984:433.55,1985:368.27,1986:365.16,1987:374.75,1988:352.60,1989:331.09,1990:287.10,1991:264.87,1992:275.58,1993:350.87,1994:312.58,1995:302.82,1996:298.14,1997:262.98,1998:246.36,1999:289.56,2000:292.79,2001:314.24,2002:332.60,2003:332.34,2004:320.25,2005:433.53,2006:480.79,2007:567.33,2008:614.49,2009:760.70,2010:1059.19,2011:1201.63,2012:1259.57,2013:867.14,2014:987.10,2015:971.90,2016:1095.28,2017:1084.83,2018:1119.42,2019:1352.78,2020:1539.86,2021:1602.77,2022:1704.92,2023:1868.90,2024:2504.25,2025:3693.55};
 var Z={1979:3.15,1980:4.64,1981:4.92,1982:4.85,1983:3.26,1984:3.01,1985:2.88,1986:2.5,1987:2.11,1988:2.01,1989:2.43,1990:2.81,1991:2.82,1992:2.81,1993:2.54,1994:2.1,1995:2.04,1996:1.99,1997:1.71,1998:1.56,1999:1.31,2000:1.25,2001:1.19,2002:1.02,2003:2.2,2004:2.13,2005:2.04,2006:2.06,2007:2.35,2008:2.52,2009:1.82,2010:1.41,2011:1.52,2012:1.32,2013:0.99,2014:0.76,2015:0.46,2016:0.3,2017:0.2,2018:0.16,2019:0.13,2020:0.11,2021:0.09,2022:0.09,2023:0.46,2024:0.74,2025:0.68,2026:0.7};
 var I={1979:4.1,1980:5.4,1981:6.3,1982:5.3,1983:3.3,1984:2.4,1985:2.1,1986:-0.1,1987:0.2,1988:1.3,1989:2.8,1990:2.7,1991:3.6,1992:5.0,1993:4.5,1994:2.7,1995:1.9,1996:1.4,1997:1.9,1998:0.8,1999:0.7,2000:1.3,2001:2.0,2002:1.4,2003:1.0,2004:1.6,2005:1.6,2006:1.6,2007:2.3,2008:2.6,2009:0.3,2010:1.0,2011:2.2,2012:1.9,2013:1.5,2014:1.0,2015:0.5,2016:0.5,2017:1.5,2018:1.8,2019:1.4,2020:0.5,2021:3.1,2022:6.9,2023:5.9,2024:2.2,2025:2.2};
-// Startwert, wird beim Laden durch den aktuellen Kurs aus kurse.json ersetzt (GitHub Action, zweimal täglich)
-var GOLD_HEUTE=3251.24, STAND=new Date(2026,10,20), F26, JETZT;
-function zeitSetzen(){F26=Math.max(0.01,(STAND-new Date(2026,0,1))/(365*864e5));JETZT=2026+F26;}
+// Pflegt sich selbst: Die GitHub Action (kurse_holen.py, zweimal täglich) schreibt den heutigen Kurs nach kurse.json
+// und in jahreswerte.json den Kurs des laufenden Jahres (letzter Lauf im Dezember = Jahresschlusskurs) sowie neue
+// Inflationsraten. Jahre, die oben fehlen, werden von dort ergänzt. Nichts muss von Hand nachgetragen werden.
+var GOLD_HEUTE=3251.24, STAND=new Date(2026,10,20), JAHR, LETZT, JETZT;
+function zeitSetzen(){
+  JAHR=STAND.getFullYear();
+  LETZT=Math.max.apply(null,Object.keys(G).map(Number).filter(function(y){return y<JAHR;}));
+  JETZT=JAHR+Math.max(0.01,(STAND-new Date(JAHR,0,1))/(365*864e5));
+}
 zeitSetzen();
-fetch('../kurse.json',{cache:'no-cache'}).then(function(r){return r.json();}).then(function(k){
-  if(k&&k.gold>500&&k.gold<20000){GOLD_HEUTE=k.gold;var d=new Date(k.stand);if(!isNaN(d)&&d.getFullYear()===2026)STAND=d;zeitSetzen();}
-}).catch(function(){});
+function laden(url){return fetch(url,{cache:'no-cache'}).then(function(r){return r.json();}).catch(function(){return null;});}
+Promise.all([laden('../kurse.json'),laden('../jahreswerte.json')]).then(function(x){
+  var k=x[0],j=x[1];
+  if(k&&k.gold>500&&k.gold<20000){GOLD_HEUTE=k.gold;var d=new Date(k.stand);if(!isNaN(d)&&d.getFullYear()>=2026)STAND=d;}
+  if(j){
+    Object.keys(j.gold||{}).forEach(function(y){y=+y;if(G[y]==null&&y<STAND.getFullYear()&&j.gold[y]>500)G[y]=j.gold[y];});
+    Object.keys(j.inflation||{}).forEach(function(y){if(I[y]==null)I[y]=j.inflation[y];});
+  }
+  zeitSetzen();
+});
 
+// Kurs zum Zeitpunkt t (2006.0 = Anfang 2006): zwischen Jahresschlusskursen geometrisch verteilt,
+// nach dem letzten bekannten Jahresschluss bis zum heutigen Kurs.
 function preis(t){var y=Math.floor(t),fr=t-y;
-  if(y>=2026){var f=Math.min(1,(t-2026)/F26);return G[2025]*Math.pow(GOLD_HEUTE/G[2025],f);}
+  if(t>=LETZT+1){var f=Math.min(1,(t-(LETZT+1))/Math.max(0.01,JETZT-(LETZT+1)));return G[LETZT]*Math.pow(GOLD_HEUTE/G[LETZT],f);}
   var a=G[y-1],b=G[y];return a*Math.pow(b/a,fr);}
 function rate(tab,y,std){return tab[y]!=null?tab[y]:std;}
 function faktor(tab,std,t){var w=1,c=t;while(c<JETZT-1e-9){var y=Math.floor(c),e=Math.min(y+1,JETZT);w*=Math.pow(1+rate(tab,y,std)/100,e-c);c=e;}return w;}
@@ -179,6 +209,11 @@ function rechnen(ziel,start,art){
   r.gold=teil(1/(GOLD_HEUTE/preis(start)),1/(GOLD_HEUTE*sg));
   r.spar=teil(1/faktor(Z,0.7,start),1/ss);
   r.kissen=teil(1,1/n);
+  // Kaufkraft-Karte: derselbe Einsatz wie beim Gold, was wird daraus mit Sparbuch und Bargeld?
+  // kaufkraft = so viel Geld bräuchte man heute, um zu kaufen, was die Einzahlungen damals gekauft haben.
+  var g=r.gold,kk=g.e*faktor(I,2,start),sp=g.e*faktor(Z,0.7,start),bar=g.e+g.m*n;
+  for(var i=0;i<n;i++){var ti=start+i/12;kk+=g.m*faktor(I,2,ti);sp+=g.m*faktor(Z,0.7,ti);}
+  r.kk={kaufkraft:kk,gold:ziel,spar:sp,bar:bar};
   return r;
 }
 function einsatz(v,n){return v.e+v.m*n;}
@@ -241,7 +276,7 @@ function fTipp(){
 }
 
 function kurve(start){
-  var y0=start-1,pts=[];for(var y=y0;y<=2025;y++)pts.push([y,G[y]]);pts.push([JETZT,GOLD_HEUTE]);
+  var y0=start-1,pts=[];for(var y=y0;y<=LETZT;y++)if(G[y]!=null)pts.push([y,G[y]]);pts.push([JETZT,GOLD_HEUTE]);
   var W=300,H=90,max=Math.max.apply(null,pts.map(function(p){return p[1];}))*1.08;
   var x=function(t){return 6+(t-y0)/(JETZT-y0)*(W-12);},yy=function(v){return H-16-(v/max)*(H-24);};
   var d=pts.map(function(p,i){return (i?'L':'M')+x(p[0]).toFixed(1)+' '+yy(p[1]).toFixed(1);}).join(' ');
@@ -258,12 +293,27 @@ function reihe(img,name,v,k,r){
   return '<div class="reihe"><img alt="" src="'+src(img)+'"><span class="n">'+name+'</span><span class="v">'+betrag(v)+'</span>'+
     '<div class="spur"><div class="b '+k+'" data-b="'+Math.max(3,einsatz(v,r.monate)/r.ziel*100).toFixed(1)+'%"></div></div></div>';
 }
+function kaufkraftKarte(r){
+  var k=r.kk,ref=k.kaufkraft,ein=betrag(r.gold);
+  function zeile(name,wert,art){
+    var diff=Math.round((wert/ref-1)*100),plus=diff>=0;
+    var GRENZE=70,breite=Math.min(100,wert/ref*GRENZE),voll=wert>=ref;
+    return '<div class="kk-zeile '+art+'"><div class="kk-kopf"><span class="kk-name">'+name+'</span>'+
+      '<span class="kk-chip '+(plus?'plus':'minus')+'">'+(plus?'+':'−')+Math.abs(diff).toLocaleString('de-DE')+' % Kaufkraft</span></div>'+
+      '<div class="kk-wert">'+eur.format(rund(wert,'einmal'))+'</div>'+
+      '<div class="kk-spur"><div class="kk-b" data-b="'+breite.toFixed(1)+'%"></div>'+(voll?'':'<div class="kk-loch" style="left:'+breite.toFixed(1)+'%;width:'+(GRENZE-breite).toFixed(1)+'%"></div>')+'<i class="kk-marke" style="left:'+GRENZE+'%"></i></div></div>';
+  }
+  return '<div class="glaskarte kk" style="animation-delay:.25s"><p class="eyebrow">Was wirklich übrig bleibt</p>'+
+    '<h2>Gleicher Einsatz, <em>drei</em> Ergebnisse</h2>'+
+    '<p class="text">Du legst '+ein+' zurück. Damit das heute noch genauso viel wert ist wie damals, bräuchtest du wegen der Inflation <b>'+eur.format(rund(ref,'einmal'))+'</b>. Die Linie zeigt diese Grenze.</p>'+
+    zeile('Bargeld zu Hause',k.bar,'k')+zeile('Sparbuch mit Zinsen',k.spar,'s')+zeile('Gold',k.gold,'g')+
+    '<p class="klein">Kaufkraft = was du dir heute davon kaufen kannst, verglichen mit dem, was das Geld beim Einzahlen wert war. Inflation: Verbraucherpreise Deutschland.</p></div>';
+}
 function ergebnis(){
   var r=stand.r,a=r.art,n=r.monate,mal=(einsatz(r.spar,n)/einsatz(r.gold,n)).toLocaleString('de-DE',{maximumFractionDigits:1});
   var hauptwert=a==='monat'?rund(r.gold.m,'monat'):rund(r.gold.e,'einmal');
   var nach=a==='einmal'?'anlegen müssen':a==='monat'?'im Monat sparen müssen':'zum Start und <b>'+geld(r.gold.m,'monat').replace(' / Monat','')+' im Monat</b> sparen müssen';
   var reakt={gold:'Treffer! Die meisten schätzen viel höher.',mitte:'Knapp daneben. Es war noch weniger.',spar:'So viel hätte das Sparbuch gebraucht.'}[stand.tipp];
-  var verlust=Math.round((1-r.real)*100);
   var text='Hallo Thomas, ich habe das Gold-Quiz gemacht: Für '+eur.format(r.ziel)+' heute hätte ich ab '+r.start+' nur '+betrag(r.gold)+' in Gold gebraucht. Wie fange ich heute sinnvoll an?';
   var el=zeige('ergebnis',5,
     '<div class="glaskarte"><p class="eyebrow">'+reakt+'</p>'+
@@ -273,8 +323,8 @@ function ergebnis(){
     '<span class="pille">'+mal+'-mal weniger Einsatz als mit dem Sparbuch</span>'+
     '<div class="vergleich">'+reihe('t_gold','Gold',r.gold,'g',r)+reihe('t_spar','Sparbuch mit Zinsen',r.spar,'s',r)+reihe('t_kissen','Bargeld zu Hause',r.kissen,'k',r)+'</div>'+
     kurve(r.start)+
-    (verlust>0?'<p class="klein">Wer '+r.start+' aufs Sparbuch gespart hat, kann sich davon heute trotz Zinsen rund '+verlust+' % weniger kaufen.</p>':'')+
     '</div>'+
+    kaufkraftKarte(r)+
     '<div class="glaskarte" style="animation-delay:.5s"><h2>Und ab <em>heute</em>?</h2>'+
     '<p class="text">Die Vergangenheit holt niemand nach. In einem kurzen Gespräch zeigt dir Thomas, wie du heute mit Gold und Silber eine Reserve aufbaust, auch mit kleinen Monatsbeträgen.</p>'+
     '<div class="person"><img alt="Thomas Fiebig" src="'+src('portrait')+'"><div><b>Thomas Fiebig</b><span>Edelmetallfachberater</span></div></div>'+
@@ -282,9 +332,9 @@ function ergebnis(){
     '<a class="leise" href="https://zeeg.me/fiebig-edelmetallfachberater" target="_blank" rel="noopener">Direkt Termin buchen</a>'+
     '<p class="ratgeber">Erst in Ruhe lesen? <a href="https://broschuere.fiebig-edelmetallfachberater.com" target="_blank" rel="noopener">Gratis-Ratgeber</a></p>'+
     '<hr class="trenn"><button class="nochmal" type="button" id="nochmal">Mit anderem Jahr nochmal spielen</button>'+
-    '<p class="recht">Rückblick mit echten Daten, keine Prognose. Vergangene Wertentwicklung ist kein verlässlicher Hinweis auf künftige Ergebnisse, Edelmetallpreise schwanken auch nach unten. Gold: Jahresschlusskurse in Euro je Feinunze (gold.de), heute '+eur.format(GOLD_HEUTE)+' am '+STAND.toLocaleDateString('de-DE')+'. Sparbuch: Durchschnittszinsen Deutsche Bundesbank. Inflation: Statistisches Bundesamt. Ohne Kosten und Steuern.</p></div>');
+    '<p class="recht">Rückblick mit echten Daten, keine Prognose. Vergangene Wertentwicklung ist kein verlässlicher Hinweis auf künftige Ergebnisse, Edelmetallpreise schwanken auch nach unten. Gold: Jahresschlusskurse in Euro je Feinunze (gold.de), heute '+eur.format(GOLD_HEUTE)+' am '+STAND.toLocaleDateString('de-DE')+'. Sparbuch: Durchschnittszinsen Deutsche Bundesbank. Inflation: Statistisches Bundesamt, für Jahre ab 2026 Eurostat (HVPI). Ohne Kosten und Steuern.</p></div>');
   zaehlen(el.querySelector('#zahl'),hauptwert);
-  setTimeout(function(){[].forEach.call(el.querySelectorAll('.b'),function(b){b.style.width=b.getAttribute('data-b');});},500);
+  setTimeout(function(){[].forEach.call(el.querySelectorAll('.b,.kk-b'),function(b){b.style.width=b.getAttribute('data-b');});},500);
   el.querySelector('#nochmal').addEventListener('click',function(){stand={ziel:stand.ziel};fJahr();});
 }
 start();
