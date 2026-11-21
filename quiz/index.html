@@ -145,6 +145,17 @@ h2{font-size:clamp(26px,7.2vw,32px)}
 .recht{font-size:11px;line-height:1.5;color:var(--fg3);margin:0}
 .entwurf a{color:inherit}
 .entwurf{font-size:11px;color:var(--fg3);text-align:center;margin:0;letter-spacing:.06em}
+/* Desktop: Bild als gerahmtes Hochformat links, Karte rechts mittig */
+@media (min-width:1100px) and (min-height:620px){
+  .hg::after{background:radial-gradient(120% 90% at 30% 50%,transparent 40%,rgba(25,24,22,.6) 100%)}
+  .hg div{inset:auto;left:max(24px,calc(50% - 516px));top:calc(50% - min(39vh,320px));height:min(78vh,640px);width:calc(min(78vh,640px) * .8);
+    border-radius:28px;transform:none;border:1px solid var(--rand);box-shadow:0 40px 100px -20px rgba(0,0,0,.8),0 0 120px -30px rgba(217,184,106,.35)}
+  .hg div.an{animation:none}
+  .app{max-width:1080px;padding:32px 24px 24px;min-height:100vh;box-sizing:border-box}
+  .raum{justify-content:center;align-items:flex-end;min-height:0}
+  .raum>*{width:460px;box-sizing:border-box}
+  .entwurf{align-self:flex-end;width:460px}
+}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
