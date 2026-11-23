@@ -305,9 +305,10 @@ function reihe(img,name,v,k,r){
 }
 function kaufkraftKarte(r){
   var k=r.kk,ref=k.kaufkraft,g=r.gold,e=eur.format(rund(g.e,'einmal')),m=eur.format(rund(g.m,'monat'));
-  var wie=r.art==='einmal'?'Angenommen, du legst '+r.start+' einmal '+e+' zur Seite.'
-         :r.art==='monat'?'Angenommen, du legst ab '+r.start+' jeden Monat '+m+' zur Seite. Zusammen sind das '+eur.format(rund(k.bar,'einmal'))+'.'
-         :'Angenommen, du legst '+r.start+' '+e+' zur Seite und danach jeden Monat '+m+'. Zusammen sind das '+eur.format(rund(k.bar,'einmal'))+'.';
+  var sum=eur.format(rund(k.bar,'einmal'));
+  var wie=r.art==='einmal'?'Du legst '+r.start+' '+e+' zur Seite.'
+         :r.art==='monat'?'Du legst ab '+r.start+' jeden Monat '+m+' zur Seite, zusammen '+sum+'.'
+         :'Du legst '+r.start+' '+e+' und dann jeden Monat '+m+' zur Seite, zusammen '+sum+'.';
   function zeile(name,wert,art){
     var diff=Math.round((wert/ref-1)*100),plus=diff>=0;
     var GRENZE=70,breite=Math.min(100,wert/ref*GRENZE),voll=wert>=ref;
@@ -318,10 +319,9 @@ function kaufkraftKarte(r){
   }
   return '<div class="glaskarte kk" style="animation-delay:.25s"><p class="eyebrow">Was wirklich übrig bleibt</p>'+
     '<h2>Gleicher Einsatz, <em>drei</em> Ergebnisse</h2>'+
-    '<p class="text">'+wie+' Seitdem ist fast alles teurer geworden. Um dir heute noch genauso viel davon kaufen zu können wie damals, bräuchtest du <b>'+eur.format(rund(ref,'einmal'))+'</b>.</p>'+
-    '<p class="text">Diese Summe ist der senkrechte Strich in den Balken. Wer davor endet, hat an Wert verloren. Wer darüber hinausgeht, hat gewonnen.</p>'+
+    '<p class="text">'+wie+' Weil seitdem alles teurer wurde, bräuchtest du heute <b>'+eur.format(rund(ref,'einmal'))+'</b>, um dir dasselbe zu kaufen. Das ist der Strich im Balken.</p>'+
     zeile('Bargeld zu Hause',k.bar,'k')+zeile('Sparbuch mit Zinsen',k.spar,'s')+zeile('Gold',k.gold,'g')+
-    '<p class="klein">Kaufkraft heißt: wie viel du dir mit dem Geld heute kaufen kannst, verglichen mit damals. Grundlage: Verbraucherpreise in Deutschland.</p></div>';
+    '<p class="klein">Kaufkraft: was du dir heute davon kaufen kannst. Grundlage: Verbraucherpreise Deutschland.</p></div>';
 }
 function ergebnis(){
   var r=stand.r,a=r.art,n=r.monate,mal=(einsatz(r.spar,n)/einsatz(r.gold,n)).toLocaleString('de-DE',{maximumFractionDigits:1});
