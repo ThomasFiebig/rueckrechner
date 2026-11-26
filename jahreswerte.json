@@ -1,9 +1,9 @@
 {
  "gold": {
-  "2026": 3150.12
+  "2026": 3251.98
  },
  "hinweis": "Automatisch von kurse_holen.py gepflegt. gold/silber = Euro je Unze, letzter Stand des Jahres; inflation = HVPI Deutschland in %.",
  "silber": {
-  "2026": 35.25
+  "2026": 37.61
  }
 }
